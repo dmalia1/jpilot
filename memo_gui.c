@@ -1321,7 +1321,7 @@ static gboolean cb_key_pressed_left_side(GtkWidget *widget,
     GtkTextBuffer *text_buffer;
     GtkTextIter iter;
 
-    if (event->keyval == GDK_Return) {
+    if (event->keyval == GDK_KEY_Return) {
         gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(next_widget));
         /* Position cursor at start of text */
@@ -1338,13 +1338,13 @@ static gboolean cb_key_pressed_right_side(GtkWidget *widget,
                                           GdkEventKey *event,
                                           gpointer next_widget) {
     /* Switch to treeView */
-    if ((event->keyval == GDK_Return) && (event->state & GDK_SHIFT_MASK)) {
+    if ((event->keyval == GDK_KEY_Return) && (event->state & GDK_SHIFT_MASK)) {
         gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(next_widget));
         return TRUE;
     }
     /* Call external editor for memo_text */
-    if ((event->keyval == GDK_e) && (event->state & GDK_CONTROL_MASK)) {
+    if ((event->keyval == GDK_KEY_e) && (event->state & GDK_CONTROL_MASK)) {
         gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
 
         /* Get current text and place in temporary file */

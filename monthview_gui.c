@@ -499,8 +499,8 @@ void monthview_gui(struct tm *date_in)
    gtk_box_pack_start(GTK_BOX(hbox_temp), button, FALSE, FALSE, 3);
 
    /* Accelerator key for right arrow */
-   gtk_widget_add_accelerator(GTK_WIDGET(button), "clicked", accel_group, 
-                              GDK_Right, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+   gtk_widget_add_accelerator(GTK_WIDGET(button), "clicked", accel_group,
+                              GDK_KEY_Right, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
    set_tooltip(show_tooltips,
                button, _("Next month   Alt+RightArrow"));
 
