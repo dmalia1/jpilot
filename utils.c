@@ -1313,7 +1313,8 @@ int dialog_save_changed_record_with_cancel(GtkWidget *widget, int changed) {
 
 void entry_set_multiline_truncate(GtkEntry *entry, gboolean value) {
 #  if GTK_MINOR_VERSION >= 10
-    entry->truncate_multiline = value;
+   // this is no longer applicable for gtk3
+   // entry->truncate_multiline = value;
 #  endif
 }
 
