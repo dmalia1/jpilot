@@ -231,7 +231,7 @@ static void cb_dialog_button(GtkWidget *widget,
 
    w = gtk_widget_get_toplevel(widget);
 
-   Pdata = gtk_object_get_data(GTK_OBJECT(w), "dialog_data");
+   Pdata = G_OBJECT_get_data(G_OBJECT(w), "dialog_data");
    if (Pdata) {
       Pdata->button_hit = GPOINTER_TO_INT(data);
    }
@@ -243,7 +243,7 @@ static gboolean cb_destroy_dialog(GtkWidget *widget)
    struct dialog_data *Pdata;
    const char *entry;
 
-   Pdata = gtk_object_get_data(GTK_OBJECT(widget), "dialog_data");
+   Pdata = G_OBJECT_get_data(G_OBJECT(widget), "dialog_data");
    if (!Pdata) {
       return TRUE;
    }
@@ -285,8 +285,8 @@ int dialog_password(GtkWindow *main_window, char *ascii_password, int retry)
    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(main_window));
 
-   gtk_signal_connect(GTK_OBJECT(dialog), "destroy",
-                      GTK_SIGNAL_FUNC(cb_destroy_dialog), dialog);
+   gtk_signal_connect(G_OBJECT(dialog), "destroy",
+                      G_CALLBACK(cb_destroy_dialog), dialog);
 
    hbox1 = gtk_hbox_new(FALSE, 2);
    gtk_container_add(GTK_CONTAINER(dialog), hbox1);
@@ -312,8 +312,8 @@ int dialog_password(GtkWindow *main_window, char *ascii_password, int retry)
    /* Password entry field */
    entry = gtk_entry_new_with_max_length(PASSWD_LEN);
    gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
-   gtk_signal_connect(GTK_OBJECT(entry), "activate",
-                      GTK_SIGNAL_FUNC(cb_dialog_button),
+   gtk_signal_connect(G_OBJECT(entry), "activate",
+                      G_CALLBACK(cb_dialog_button),
                       GINT_TO_POINTER(DIALOG_SAID_2));
    gtk_box_pack_start(GTK_BOX(hbox1), entry, TRUE, TRUE, 1);
 
@@ -326,15 +326,15 @@ int dialog_password(GtkWindow *main_window, char *ascii_password, int retry)
 
    /* Cancel Button */
    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-   gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                      GTK_SIGNAL_FUNC(cb_dialog_button),
+   gtk_signal_connect(G_OBJECT(button), "clicked",
+                      G_CALLBACK(cb_dialog_button),
                       GINT_TO_POINTER(DIALOG_SAID_1));
    gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 1);
 
    /* OK Button */
    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-   gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                      GTK_SIGNAL_FUNC(cb_dialog_button),
+   gtk_signal_connect(G_OBJECT(button), "clicked",
+                      G_CALLBACK(cb_dialog_button),
                       GINT_TO_POINTER(DIALOG_SAID_2));
    gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 1);
    gtk_widget_set_can_default(button,TRUE);
@@ -344,7 +344,7 @@ int dialog_password(GtkWindow *main_window, char *ascii_password, int retry)
    Pdata.button_hit = DIALOG_SAID_1;
    Pdata.entry=entry;
    Pdata.text[0]='\0';
-   gtk_object_set_data(GTK_OBJECT(dialog), "dialog_data", &Pdata);
+   G_OBJECT_set_data(G_OBJECT(dialog), "dialog_data", &Pdata);
 
    gtk_widget_grab_focus(GTK_WIDGET(entry));
 

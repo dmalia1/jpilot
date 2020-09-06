@@ -361,50 +361,50 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
             if (exp_cat_menu_item2[i]) {
-                gtk_signal_connect(GTK_OBJECT(exp_cat_menu_item2[i]), "toggled",
-                                   GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                gtk_signal_connect(G_OBJECT(exp_cat_menu_item2[i]), "toggled",
+                                   G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_EXPENSE_TYPES; i++) {
             if (menu_item_expense_type[i]) {
-                gtk_signal_connect(GTK_OBJECT(menu_item_expense_type[i]),
+                gtk_signal_connect(G_OBJECT(menu_item_expense_type[i]),
                                    "toggled",
-                                   GTK_SIGNAL_FUNC(cb_record_changed),
+                                   G_CALLBACK(cb_record_changed),
                                    NULL);
             }
         }
         for (i = 0; i < MAX_PAYMENTS; i++) {
             if (menu_item_payment[i]) {
-                gtk_signal_connect(GTK_OBJECT(menu_item_payment[i]),
+                gtk_signal_connect(G_OBJECT(menu_item_payment[i]),
                                    "toggled",
-                                   GTK_SIGNAL_FUNC(cb_record_changed),
+                                   G_CALLBACK(cb_record_changed),
                                    NULL);
             }
         }
         for (i = 0; i < MAX_CURRENCYS; i++) {
             if (menu_item_currency[i]) {
-                gtk_signal_connect(GTK_OBJECT(menu_item_currency[i]),
+                gtk_signal_connect(G_OBJECT(menu_item_currency[i]),
                                    "toggled",
-                                   GTK_SIGNAL_FUNC(cb_record_changed),
+                                   G_CALLBACK(cb_record_changed),
                                    NULL);
             }
         }
-        gtk_signal_connect(GTK_OBJECT(spinner_mon), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_connect(GTK_OBJECT(spinner_day), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_connect(GTK_OBJECT(spinner_year), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_connect(GTK_OBJECT(entry_amount), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_connect(GTK_OBJECT(entry_vendor), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_connect(GTK_OBJECT(entry_city), "changed",
-                           GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(spinner_mon), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(spinner_day), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(spinner_year), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(entry_amount), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(entry_vendor), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_connect(G_OBJECT(entry_city), "changed",
+                           G_CALLBACK(cb_record_changed), NULL);
         g_signal_connect(attendees_buffer, "changed",
-                         GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                         G_CALLBACK(cb_record_changed), NULL);
         g_signal_connect(note_buffer, "changed",
-                         GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                         G_CALLBACK(cb_record_changed), NULL);
     }
 
     /* DISCONNECT */
@@ -414,44 +414,44 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
             if (exp_cat_menu_item2[i]) {
-                gtk_signal_disconnect_by_func(GTK_OBJECT(exp_cat_menu_item2[i]),
-                                              GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                gtk_signal_disconnect_by_func(G_OBJECT(exp_cat_menu_item2[i]),
+                                              G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_EXPENSE_TYPES; i++) {
             if (menu_item_expense_type[i]) {
-                gtk_signal_disconnect_by_func(GTK_OBJECT(menu_item_expense_type[i]),
-                                              GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                gtk_signal_disconnect_by_func(G_OBJECT(menu_item_expense_type[i]),
+                                              G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_PAYMENTS; i++) {
             if (menu_item_payment[i]) {
-                gtk_signal_disconnect_by_func(GTK_OBJECT(menu_item_payment[i]),
-                                              GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                gtk_signal_disconnect_by_func(G_OBJECT(menu_item_payment[i]),
+                                              G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_CURRENCYS; i++) {
             if (menu_item_currency[i]) {
-                gtk_signal_disconnect_by_func(GTK_OBJECT(menu_item_currency[i]),
-                                              GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                gtk_signal_disconnect_by_func(G_OBJECT(menu_item_currency[i]),
+                                              G_CALLBACK(cb_record_changed), NULL);
             }
         }
-        gtk_signal_disconnect_by_func(GTK_OBJECT(spinner_mon),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(GTK_OBJECT(spinner_day),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(GTK_OBJECT(spinner_year),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(GTK_OBJECT(entry_amount),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(GTK_OBJECT(entry_vendor),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(GTK_OBJECT(entry_city),
-                                      GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(spinner_mon),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(spinner_day),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(spinner_year),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(entry_amount),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(entry_vendor),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        gtk_signal_disconnect_by_func(G_OBJECT(entry_city),
+                                      G_CALLBACK(cb_record_changed), NULL);
         g_signal_handlers_disconnect_by_func(attendees_buffer,
-                                             GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                                             G_CALLBACK(cb_record_changed), NULL);
         g_signal_handlers_disconnect_by_func(note_buffer,
-                                             GTK_SIGNAL_FUNC(cb_record_changed), NULL);
+                                             G_CALLBACK(cb_record_changed), NULL);
     }
 }
 
@@ -1327,8 +1327,8 @@ static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_me
         menu_item = gtk_radio_menu_item_new_with_label(group, _(items[i]));
         menu_items[i] = menu_item;
         item_num = i;
-        gtk_signal_connect(GTK_OBJECT(menu_item), "activate",
-                           GTK_SIGNAL_FUNC(cb_pulldown_menu),
+        gtk_signal_connect(G_OBJECT(menu_item), "activate",
+                           G_CALLBACK(cb_pulldown_menu),
                            GINT_TO_POINTER(menu_index << 8 | item_num));
         group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(menu_item));
         gtk_menu_append(GTK_MENU(menu), menu_item);
@@ -1650,25 +1650,25 @@ int plugin_gui(GtkWidget *vbox, GtkWidget *hbox, unsigned int unique_id) {
     /* Delete, Copy, New, etc. buttons */
     CREATE_BUTTON(delete_record_button, _("Delete"), DELETE, _("Delete the selected record"), GDK_d, GDK_CONTROL_MASK,
                   "Ctrl+D")
-    gtk_signal_connect(GTK_OBJECT(delete_record_button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_delete),
+    gtk_signal_connect(G_OBJECT(delete_record_button), "clicked",
+                       G_CALLBACK(cb_delete),
                        GINT_TO_POINTER(DELETE_FLAG));
 
     CREATE_BUTTON(copy_record_button, _("Copy"), COPY, _("Copy the selected record"), GDK_c,
                   GDK_CONTROL_MASK | GDK_SHIFT_MASK, "Ctrl+Shift+C")
-    gtk_signal_connect(GTK_OBJECT(copy_record_button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_add_new_record),
+    gtk_signal_connect(G_OBJECT(copy_record_button), "clicked",
+                       G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(COPY_FLAG));
 
     CREATE_BUTTON(new_record_button, _("New Record"), NEW, _("Add a new record"), GDK_n, GDK_CONTROL_MASK, "Ctrl+N")
-    gtk_signal_connect(GTK_OBJECT(new_record_button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_add_new_record),
+    gtk_signal_connect(G_OBJECT(new_record_button), "clicked",
+                       G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(CLEAR_FLAG));
 
     CREATE_BUTTON(add_record_button, _("Add Record"), ADD, _("Add the new record"), GDK_KEY_Return, GDK_CONTROL_MASK,
                   "Ctrl+Enter")
-    gtk_signal_connect(GTK_OBJECT(add_record_button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_add_new_record),
+    gtk_signal_connect(G_OBJECT(add_record_button), "clicked",
+                       G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(NEW_FLAG));
 #ifndef ENABLE_STOCK_BUTTONS
     gtk_widget_set_name(GTK_WIDGET(GTK_LABEL(gtk_bin_get_child(GTK_BIN(add_record_button)))),
@@ -1677,8 +1677,8 @@ int plugin_gui(GtkWidget *vbox, GtkWidget *hbox, unsigned int unique_id) {
 
     CREATE_BUTTON(apply_record_button, _("Apply Changes"), APPLY, _("Commit the modifications"), GDK_KEY_Return,
                   GDK_CONTROL_MASK, "Ctrl+Enter")
-    gtk_signal_connect(GTK_OBJECT(apply_record_button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_add_new_record),
+    gtk_signal_connect(G_OBJECT(apply_record_button), "clicked",
+                       G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(MODIFY_FLAG));
 #ifndef ENABLE_STOCK_BUTTONS
     gtk_widget_set_name(GTK_WIDGET(GTK_LABEL(gtk_bin_get_child(GTK_BIN(apply_record_button)))),

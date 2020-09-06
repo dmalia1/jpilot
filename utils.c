@@ -297,8 +297,8 @@ int cal_dialog(GtkWindow *main_window,
     gtk_window_set_modal(GTK_WINDOW(window), TRUE);
     gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(main_window));
 
-    gtk_signal_connect(GTK_OBJECT(window), "destroy",
-                       GTK_SIGNAL_FUNC(cb_destroy), window);
+    gtk_signal_connect(G_OBJECT(window), "destroy",
+                       G_CALLBACK(cb_destroy), window);
 
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(window), vbox);
@@ -317,8 +317,8 @@ int cal_dialog(GtkWindow *main_window,
                                  GTK_CALENDAR_SHOW_DAY_NAMES |
                                  GTK_CALENDAR_SHOW_WEEK_NUMBERS);
 
-    /* gtk_signal_connect(GTK_OBJECT(cal), "day_selected", cb_cal_sel, NULL); */
-    gtk_signal_connect(GTK_OBJECT(cal), "day_selected_double_click", GTK_SIGNAL_FUNC(cb_quit),
+    /* gtk_signal_connect(G_OBJECT(cal), "day_selected", cb_cal_sel, NULL); */
+    gtk_signal_connect(G_OBJECT(cal), "day_selected_double_click", G_CALLBACK(cb_quit),
                        GINT_TO_POINTER(CAL_DONE));
 
     gtk_calendar_select_month(GTK_CALENDAR(cal), *mon, (*year) + 1900);
@@ -327,24 +327,24 @@ int cal_dialog(GtkWindow *main_window,
     /* Cancel/Today/OK buttons */
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
     gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(cb_quit),
+    gtk_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(cb_quit),
                        GINT_TO_POINTER(CAL_CANCEL));
 
     button = gtk_button_new_with_label(_("Today"));
     gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(cb_today), cal);
+    gtk_signal_connect(G_OBJECT(button), "clicked",
+                       G_CALLBACK(cb_today), cal);
 
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
     gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-    gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(cb_quit),
+    gtk_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(cb_quit),
                        GINT_TO_POINTER(CAL_DONE));
 
-    gtk_object_set_data(GTK_OBJECT(window), "mon", mon);
-    gtk_object_set_data(GTK_OBJECT(window), "day", day);
-    gtk_object_set_data(GTK_OBJECT(window), "year", year);
-    gtk_object_set_data(GTK_OBJECT(window), "return_code", &return_code);
-    gtk_object_set_data(GTK_OBJECT(window), "cal", cal);
+    G_OBJECT_set_data(G_OBJECT(window), "mon", mon);
+    G_OBJECT_set_data(G_OBJECT(window), "day", day);
+    G_OBJECT_set_data(G_OBJECT(window), "year", year);
+    G_OBJECT_set_data(G_OBJECT(window), "return_code", &return_code);
+    G_OBJECT_set_data(G_OBJECT(window), "cal", cal);
 
     gtk_widget_show_all(window);
 
@@ -398,16 +398,16 @@ static void cb_quit(GtkWidget *widget, gpointer data) {
 
     window = gtk_widget_get_toplevel(widget);
 
-    Preturn_code = gtk_object_get_data(GTK_OBJECT(window), "return_code");
+    Preturn_code = G_OBJECT_get_data(G_OBJECT(window), "return_code");
     if (Preturn_code) *Preturn_code = GPOINTER_TO_INT(data);
-    cal = gtk_object_get_data(GTK_OBJECT(window), "cal");
+    cal = G_OBJECT_get_data(G_OBJECT(window), "cal");
 
     if (Preturn_code && *Preturn_code == CAL_DONE) {
         if (cal) {
             gtk_calendar_get_date(GTK_CALENDAR(cal), &y, &m, &d);
-            Pm = gtk_object_get_data(GTK_OBJECT(window), "mon");
-            Pd = gtk_object_get_data(GTK_OBJECT(window), "day");
-            Py = gtk_object_get_data(GTK_OBJECT(window), "year");
+            Pm = G_OBJECT_get_data(G_OBJECT(window), "mon");
+            Pd = G_OBJECT_get_data(G_OBJECT(window), "day");
+            Py = G_OBJECT_get_data(G_OBJECT(window), "year");
             if (Pm) *Pm = m;
             if (Pd) *Pd = d;
             if (Py) *Py = y;
@@ -1169,8 +1169,8 @@ int dialog_generic(GtkWindow *main_window,
         gtk_window_set_transient_for(GTK_WINDOW(glob_dialog), GTK_WINDOW(main_window));
     }
 
-    gtk_signal_connect(GTK_OBJECT(glob_dialog), "destroy",
-                       GTK_SIGNAL_FUNC(cb_destroy_dialog), glob_dialog);
+    gtk_signal_connect(G_OBJECT(glob_dialog), "destroy",
+                       G_CALLBACK(cb_destroy_dialog), glob_dialog);
 
     vbox1 = gtk_vbox_new(FALSE, 5);
     gtk_container_add(GTK_CONTAINER(glob_dialog), vbox1);
@@ -1227,8 +1227,8 @@ int dialog_generic(GtkWindow *main_window,
             button = gtk_button_new_from_stock(GTK_STOCK_NO);
         else
             button = gtk_button_new_with_label(_(button_text[i]));
-        gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                           GTK_SIGNAL_FUNC(cb_dialog_button),
+        gtk_signal_connect(G_OBJECT(button), "clicked",
+                           G_CALLBACK(cb_dialog_button),
                            GINT_TO_POINTER(DIALOG_SAID_1 + i));
         gtk_box_pack_start(GTK_BOX(hbox1), button, TRUE, TRUE, 1);
 
@@ -2425,8 +2425,8 @@ int make_category_menu(GtkWidget **category_menu,
     if (add_an_all_item) {
         cat_menu_item[0] = gtk_radio_menu_item_new_with_label(group, _("All"));
         if (selection_callback) {
-            gtk_signal_connect(GTK_OBJECT(cat_menu_item[0]), "activate",
-                               GTK_SIGNAL_FUNC(selection_callback), GINT_TO_POINTER(CATEGORY_ALL));
+            gtk_signal_connect(G_OBJECT(cat_menu_item[0]), "activate",
+                               G_CALLBACK(selection_callback), GINT_TO_POINTER(CATEGORY_ALL));
         }
         group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(cat_menu_item[0]));
         gtk_menu_append(GTK_MENU(menu), cat_menu_item[0]);
@@ -2439,8 +2439,8 @@ int make_category_menu(GtkWidget **category_menu,
             cat_menu_item[i + offset] = gtk_radio_menu_item_new_with_label(
                     group, sort_l[i].Pcat);
             if (selection_callback) {
-                gtk_signal_connect(GTK_OBJECT(cat_menu_item[i + offset]), "activate",
-                                   GTK_SIGNAL_FUNC(selection_callback), GINT_TO_POINTER(sort_l[i].cat_num));
+                gtk_signal_connect(G_OBJECT(cat_menu_item[i + offset]), "activate",
+                                   G_CALLBACK(selection_callback), GINT_TO_POINTER(sort_l[i].cat_num));
             }
             group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(cat_menu_item[i + offset]));
             gtk_menu_append(GTK_MENU(menu), cat_menu_item[i + offset]);
@@ -2453,8 +2453,8 @@ int make_category_menu(GtkWidget **category_menu,
         cat_menu_item[i + offset] = gtk_radio_menu_item_new_with_label(group,
                                                                        _("Edit Categories..."));
         if (selection_callback) {
-            gtk_signal_connect(GTK_OBJECT(cat_menu_item[i + offset]), "activate",
-                               GTK_SIGNAL_FUNC(selection_callback), GINT_TO_POINTER(i + offset));
+            gtk_signal_connect(G_OBJECT(cat_menu_item[i + offset]), "activate",
+                               G_CALLBACK(selection_callback), GINT_TO_POINTER(i + offset));
         }
         group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(cat_menu_item[i + offset]));
         gtk_menu_append(GTK_MENU(menu), cat_menu_item[i + offset]);

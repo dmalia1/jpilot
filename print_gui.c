@@ -183,8 +183,8 @@ int print_gui(GtkWidget *main_window, int app, int date_button, int mon_week_day
    g_snprintf(temp, sizeof(temp), "%s %s", PN, _("Print Options"));
    gtk_window_set_title(GTK_WINDOW(window), temp);
 
-   gtk_signal_connect(GTK_OBJECT(window), "destroy",
-                      GTK_SIGNAL_FUNC(cb_destroy), window);
+   gtk_signal_connect(G_OBJECT(window), "destroy",
+                      G_CALLBACK(cb_destroy), window);
 
    vbox = gtk_vbox_new(FALSE, 0);
    gtk_container_add(GTK_CONTAINER(window), vbox);
@@ -334,14 +334,14 @@ int print_gui(GtkWidget *main_window, int app, int date_button, int mon_week_day
 
    /* Cancel button */
    button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-   gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                      GTK_SIGNAL_FUNC(cb_cancel), window);
+   gtk_signal_connect(G_OBJECT(button), "clicked",
+                      G_CALLBACK(cb_cancel), window);
    gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 
    /* Print button */
    button = gtk_button_new_from_stock(GTK_STOCK_PRINT);
-   gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                      GTK_SIGNAL_FUNC(cb_print), window);
+   gtk_signal_connect(G_OBJECT(button), "clicked",
+                      G_CALLBACK(cb_print), window);
    gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 
 
