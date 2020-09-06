@@ -384,6 +384,8 @@ int str_to_vcard_str(char *, int, char *);
 
 /* Parse the string and replace CR and LFs with spaces */
 void remove_cr_lfs(char *str);
+/* replace function that was removed from gtk3 with something similar.. */
+GtkEntry * new_gtk_entry_with_max_length(gint length);
 
 /* Parse the string and replace CR and LFs with spaces
  * a null is written if len is reached */

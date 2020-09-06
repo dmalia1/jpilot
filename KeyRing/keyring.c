@@ -1656,7 +1656,7 @@ static int dialog_password(GtkWindow *main_window,
     }
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
     g_signal_connect(G_OBJECT(entry), "activate",
                        G_CALLBACK(cb_dialog_button),

@@ -222,7 +222,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     label = gtk_label_new(_("Prefix 1"));
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_text(GTK_ENTRY(entry), prefix);
     gtk_box_pack_start(GTK_BOX(hbox1), entry, TRUE, TRUE, 1);
 
@@ -244,7 +244,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     label = gtk_label_new(_("Prefix 2"));
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_text(GTK_ENTRY(entry), prefix);
     gtk_box_pack_start(GTK_BOX(hbox1), entry, TRUE, TRUE, 1);
 
@@ -266,7 +266,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     label = gtk_label_new(_("Prefix 3"));
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_text(GTK_ENTRY(entry), prefix);
     gtk_box_pack_start(GTK_BOX(hbox1), entry, TRUE, TRUE, 1);
 
@@ -287,7 +287,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     Pdata->label_prefix = label;
     set_prefix_label(Pdata);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_text(GTK_ENTRY(entry), string);
     g_signal_connect(G_OBJECT(entry), "activate",
                        G_CALLBACK(cb_dial_ext), Pdata);
@@ -311,7 +311,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     label = gtk_label_new(_("Extension"));
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(32);
+    entry = new_gtk_entry_with_max_length(32);
     gtk_entry_set_text(GTK_ENTRY(entry), ext);
     g_signal_connect(G_OBJECT(entry), "activate",
                        G_CALLBACK(cb_dial_ext), Pdata);
@@ -333,7 +333,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     label = gtk_label_new(_("Dial Command"));
     gtk_box_pack_start(GTK_BOX(hbox1), label, FALSE, FALSE, 2);
 
-    entry = gtk_entry_new_with_max_length(100);
+    entry = new_gtk_entry_with_max_length(100);
     gtk_entry_set_text(GTK_ENTRY(entry), ext);
     gtk_box_pack_start(GTK_BOX(hbox1), entry, TRUE, TRUE, 1);
 

@@ -1317,7 +1317,11 @@ void entry_set_multiline_truncate(GtkEntry *entry, gboolean value) {
    // entry->truncate_multiline = value;
 #  endif
 }
-
+GtkEntry * new_gtk_entry_with_max_length(gint length){
+    GtkEntry* returnVal = gtk_entry_new();
+    gtk_entry_set_max_length(returnVal,length);
+    return returnVal;
+}
 /* returns 1 if found */
 /*        0 if eof */
 int find_next_offset(mem_rec_header *mem_rh, long fpos,
