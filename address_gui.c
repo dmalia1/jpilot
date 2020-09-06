@@ -2926,7 +2926,7 @@ static gboolean cb_key_pressed_left_side(GtkWidget *widget,
     GtkTextIter iter;
 
     if (event->keyval == GDK_KEY_Return) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
         if (address_version == 0) {
             switch (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook))) {
@@ -2986,14 +2986,14 @@ static gboolean cb_key_pressed_right_side(GtkWidget *widget,
                                           GdkEventKey *event,
                                           gpointer data) {
     if ((event->keyval == GDK_KEY_Return) && (event->state & GDK_SHIFT_MASK)) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(treeView));
         return TRUE;
     }
     /* Call external editor for note text */
     if (data != NULL &&
         (event->keyval == GDK_KEY_e) && (event->state & GDK_CONTROL_MASK)) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
         /* Get current text and place in temporary file */
         GtkTextIter start_iter;
@@ -3644,7 +3644,7 @@ cb_key_pressed_quickfind(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     row_count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore), NULL);
     if (!row_count) return FALSE;
 
-    gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+    g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
     select_row = rowSelected + add;
     if (select_row > row_count - 1) {
@@ -3677,7 +3677,7 @@ static gboolean cb_key_pressed(GtkWidget *widget, GdkEventKey *event) {
             return FALSE;
         }
     }
-    gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+    g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
     /* Initialize page and next widget in case search fails */
     page = schema[0].notebook_page;
@@ -4497,10 +4497,10 @@ int address_gui(GtkWidget *vbox, GtkWidget *hbox) {
                 case ADDRESS_GUI_DIAL_SHOW_PHONE_MENU_TEXT:
                     if (!strcasecmp(contact_app_info.phoneLabels[phone_i], _("E-mail"))) {
                         dial_button[phone_i] = gtk_button_new_with_label(_("Mail"));
-                        G_OBJECT_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
                     } else {
                         dial_button[phone_i] = gtk_button_new_with_label(_("Dial"));
-                        G_OBJECT_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
                     }
                     gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(dial_button[phone_i]),
                                      x - 4, x - 3, table_y_i, table_y_i + 1, GTK_FILL, 0, 0, 0);

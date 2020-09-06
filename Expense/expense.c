@@ -414,39 +414,39 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
             if (exp_cat_menu_item2[i]) {
-                g_signal_disconnect_by_func(G_OBJECT(exp_cat_menu_item2[i]),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(exp_cat_menu_item2[i]),
                                               G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_EXPENSE_TYPES; i++) {
             if (menu_item_expense_type[i]) {
-                g_signal_disconnect_by_func(G_OBJECT(menu_item_expense_type[i]),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_expense_type[i]),
                                               G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_PAYMENTS; i++) {
             if (menu_item_payment[i]) {
-                g_signal_disconnect_by_func(G_OBJECT(menu_item_payment[i]),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_payment[i]),
                                               G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < MAX_CURRENCYS; i++) {
             if (menu_item_currency[i]) {
-                g_signal_disconnect_by_func(G_OBJECT(menu_item_currency[i]),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_currency[i]),
                                               G_CALLBACK(cb_record_changed), NULL);
             }
         }
-        g_signal_disconnect_by_func(G_OBJECT(spinner_mon),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(spinner_mon),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(spinner_day),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(spinner_day),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(spinner_year),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(spinner_year),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(entry_amount),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_amount),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(entry_vendor),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_vendor),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(entry_city),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_city),
                                       G_CALLBACK(cb_record_changed), NULL);
         g_signal_handlers_disconnect_by_func(attendees_buffer,
                                              G_CALLBACK(cb_record_changed), NULL);

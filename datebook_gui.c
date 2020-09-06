@@ -2771,7 +2771,7 @@ static gboolean cb_key_pressed_left_side(GtkWidget *widget,
     GtkTextIter iter;
 
     if (event->keyval == GDK_KEY_Return) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(next_widget));
         /* Position cursor at start of text */
         text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(next_widget));
@@ -2787,14 +2787,14 @@ static gboolean cb_key_pressed_right_side(GtkWidget *widget,
                                           GdkEventKey *event,
                                           gpointer data) {
     if ((event->keyval == GDK_KEY_Return) && (event->state & GDK_SHIFT_MASK)) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(treeView));
         return TRUE;
     }
     /* Call external editor for note text */
     if (data != NULL &&
         (event->keyval == GDK_KEY_e) && (event->state & GDK_CONTROL_MASK)) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
         /* Get current text and place in temporary file */
         GtkTextIter start_iter;
@@ -3908,7 +3908,7 @@ static void cb_cal_changed(GtkWidget *widget,
 
         b = dialog_save_changed_record_with_cancel(pane, record_changed);
         if (b == DIALOG_SAID_1) { /* Cancel */
-            g_signal_disconnect_by_func(G_OBJECT(main_calendar),
+            g_signal_handlers_disconnect_by_func(G_OBJECT(main_calendar),
                                           G_CALLBACK(cb_cal_changed),
                                           GINT_TO_POINTER(CAL_DAY_SELECTED));
             gtk_calendar_select_month(GTK_CALENDAR(main_calendar), (guint) current_month, (guint) (1900 + current_year));
@@ -3924,7 +3924,7 @@ static void cb_cal_changed(GtkWidget *widget,
           * to avoid re-triggering cb_cal_changed but the original date
           * must be re-selected after the add_new_record has changed it */
 
-            g_signal_disconnect_by_func(G_OBJECT(main_calendar),
+            g_signal_handlers_disconnect_by_func(G_OBJECT(main_calendar),
                                           G_CALLBACK(cb_cal_changed),
                                           GINT_TO_POINTER(CAL_DAY_SELECTED));
 
@@ -4119,7 +4119,7 @@ int datebook_refresh(int first, int do_init) {
 
     /* Need to disconnect signal before using gtk_calendar_select_day
       or callback will be activated inadvertently. */
-    g_signal_disconnect_by_func(G_OBJECT(main_calendar),
+    g_signal_handlers_disconnect_by_func(G_OBJECT(main_calendar),
                                   G_CALLBACK(cb_cal_changed),
                                   GINT_TO_POINTER(CAL_DAY_SELECTED));
 
@@ -4291,7 +4291,7 @@ static gboolean cb_entry_key_pressed(GtkWidget *widget,
 
     jp_logf(JP_LOG_DEBUG, "cb_entry_key_pressed key = %d\n", event->keyval);
 
-    gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+    g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
     if ((event->keyval >= GDK_KEY_0) && (event->keyval <= GDK_KEY_9)) {
         digit = (event->keyval) - GDK_KEY_0;
@@ -4351,7 +4351,7 @@ static gboolean cb_key_pressed_tab(GtkWidget *widget,
                                    GdkEventKey *event,
                                    gpointer next_widget) {
     if (event->keyval == GDK_KEY_Tab) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(next_widget));
         return TRUE;
     }
@@ -4369,7 +4369,7 @@ static gboolean cb_key_pressed_tab_entry(GtkWidget *widget,
         text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
         gtk_text_buffer_get_iter_at_mark(text_buffer, &cursor_pos_iter, gtk_text_buffer_get_insert(text_buffer));
         if (gtk_text_iter_is_end(&cursor_pos_iter)) {
-            gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+            g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
             gtk_widget_grab_focus(GTK_WIDGET(next_widget));
             return TRUE;
         }
@@ -4381,7 +4381,7 @@ static gboolean cb_key_pressed_shift_tab(GtkWidget *widget,
                                          GdkEventKey *event,
                                          gpointer next_widget) {
     if (event->keyval == GDK_KEY_ISO_Left_Tab) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(next_widget));
         return TRUE;
     }
@@ -4408,7 +4408,7 @@ static gboolean cb_keyboard(GtkWidget *widget, GdkEventKey *event, gpointer *p) 
     }
 
     if (up || down) {
-        gtk_signal_emit_stop_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
 
         b = dialog_save_changed_record_with_cancel(pane, record_changed);
         if (b == DIALOG_SAID_1) { /* Cancel */
@@ -4484,9 +4484,9 @@ int datebook_gui_cleanup(void) {
     /* Remove the accelerators */
     gtk_window_remove_accel_group(GTK_WINDOW(gtk_widget_get_toplevel(main_calendar)), accel_group);
 
-    g_signal_disconnect_by_func(G_OBJECT(main_calendar),
+    g_signal_handlers_disconnect_by_func(G_OBJECT(main_calendar),
                                   G_CALLBACK(cb_keyboard), NULL);
-    g_signal_disconnect_by_func(G_OBJECT(treeView),
+    g_signal_handlers_disconnect_by_func(G_OBJECT(treeView),
                                   G_CALLBACK(cb_keyboard), NULL);
 
     return EXIT_SUCCESS;
@@ -4610,37 +4610,37 @@ static void connect_changed_signals(int con_or_dis) {
         if (datebook_version) {
             for (i = 0; i < NUM_DATEBOOK_CAT_ITEMS; i++) {
                 if (dbook_cat_menu_item2[i]) {
-                    g_signal_disconnect_by_func(G_OBJECT(dbook_cat_menu_item2[i]),
+                    g_signal_handlers_disconnect_by_func(G_OBJECT(dbook_cat_menu_item2[i]),
                                                   G_CALLBACK(cb_record_changed), NULL);
                 }
             }
         }
 
-        g_signal_disconnect_by_func(G_OBJECT(radio_button_alarm_min),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_alarm_min),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(radio_button_alarm_hour),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_alarm_hour),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(radio_button_alarm_day),
-                                      G_CALLBACK(cb_record_changed), NULL);
-
-        g_signal_disconnect_by_func(G_OBJECT(check_button_alarm),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_alarm_day),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(radio_button_no_time),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(check_button_alarm),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(radio_button_appt_time),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_no_time),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(begin_date_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_appt_time),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(begin_time_entry),
-                                      G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(end_time_entry),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(begin_date_button),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(units_entry),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(begin_time_entry),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        g_signal_handlers_disconnect_by_func(G_OBJECT(end_time_entry),
+                                      G_CALLBACK(cb_record_changed), NULL);
+
+        g_signal_handlers_disconnect_by_func(G_OBJECT(units_entry),
                                       G_CALLBACK(cb_record_changed), NULL);
 
         g_signal_handlers_disconnect_by_func(dbook_desc_buffer,
@@ -4656,52 +4656,52 @@ static void connect_changed_signals(int con_or_dis) {
 #ifdef ENABLE_DATEBK
         if (use_db3_tags) {
             if (datebk_entry) {
-                g_signal_disconnect_by_func(G_OBJECT(datebk_entry),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(datebk_entry),
                                               G_CALLBACK(cb_record_changed),
                                               NULL);
             }
         }
 #endif
 
-        g_signal_disconnect_by_func(G_OBJECT(notebook),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(notebook),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(repeat_day_entry),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(repeat_day_entry),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(repeat_week_entry),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(repeat_week_entry),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(repeat_mon_entry),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(repeat_mon_entry),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(repeat_year_entry),
-                                      G_CALLBACK(cb_record_changed), NULL);
-
-        g_signal_disconnect_by_func(G_OBJECT(check_button_day_endon),
-                                      G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(check_button_week_endon),
-                                      G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(check_button_mon_endon),
-                                      G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(check_button_year_endon),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(repeat_year_entry),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(glob_endon_day_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(check_button_day_endon),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(glob_endon_week_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(check_button_week_endon),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(glob_endon_mon_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(check_button_mon_endon),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(glob_endon_year_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(check_button_year_endon),
                                       G_CALLBACK(cb_record_changed), NULL);
 
-        g_signal_disconnect_by_func(G_OBJECT(toggle_button_repeat_mon_byday),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(glob_endon_day_button),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(toggle_button_repeat_mon_bydate),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(glob_endon_week_button),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(private_checkbox),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(glob_endon_mon_button),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        g_signal_handlers_disconnect_by_func(G_OBJECT(glob_endon_year_button),
+                                      G_CALLBACK(cb_record_changed), NULL);
+
+        g_signal_handlers_disconnect_by_func(G_OBJECT(toggle_button_repeat_mon_byday),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        g_signal_handlers_disconnect_by_func(G_OBJECT(toggle_button_repeat_mon_bydate),
+                                      G_CALLBACK(cb_record_changed), NULL);
+        g_signal_handlers_disconnect_by_func(G_OBJECT(private_checkbox),
                                       G_CALLBACK(cb_record_changed), NULL);
 
         for (i = 0; i < 7; i++) {
-            g_signal_disconnect_by_func(G_OBJECT(toggle_button_repeat_days[i]),
+            g_signal_handlers_disconnect_by_func(G_OBJECT(toggle_button_repeat_days[i]),
                                           G_CALLBACK(cb_record_changed), NULL);
         }
     }

@@ -824,20 +824,20 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_KEYRING_CAT_ITEMS; i++) {
             if (keyr_cat_menu_item2[i]) {
-                g_signal_disconnect_by_func(G_OBJECT(keyr_cat_menu_item2[i]),
+                g_signal_handlers_disconnect_by_func(G_OBJECT(keyr_cat_menu_item2[i]),
                                               G_CALLBACK(cb_record_changed),
                                               NULL);
             }
         }
 
-        g_signal_disconnect_by_func(G_OBJECT(entry_name),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_name),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(entry_account),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_account),
                                       G_CALLBACK(cb_record_changed), NULL);
-        g_signal_disconnect_by_func(G_OBJECT(entry_password),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(entry_password),
                                       G_CALLBACK(cb_record_changed),
                                       GINT_TO_POINTER(PASSWD_FLAG));
-        g_signal_disconnect_by_func(G_OBJECT(date_button),
+        g_signal_handlers_disconnect_by_func(G_OBJECT(date_button),
                                       G_CALLBACK(cb_record_changed), NULL);
         g_signal_handlers_disconnect_by_func(keyr_note_buffer,
                                              G_CALLBACK(cb_record_changed), NULL);
