@@ -94,14 +94,14 @@ static void set_colors()
 #endif /* #ifdef COLORS */
 
 /* Sync Port menu code */
-static void cb_serial_port_menu(GtkWidget *widget,
+static void cb_serial_port_menu(GtkComboBox *widget,
                                 gpointer   data)
 {
    if (!widget)
       return;
-   if (!(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))) {
-      return;
-   }
+    if(gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0){
+        return;
+    }
 
    const char *port_str = port_choices[GPOINTER_TO_INT(data)]; 
    gtk_entry_set_text(GTK_ENTRY(port_entry), port_str);
@@ -122,28 +122,25 @@ static int make_serial_port_menu(GtkWidget **port_menu)
    int i, selected;
    const char *entry_text;
 
-   *port_menu = gtk_option_menu_new();
+   *port_menu = gtk_combo_box_text_new();
 
-   menu = gtk_menu_new();
-   group = NULL;
+  // menu = gtk_menu_new();
+  // group = NULL;
    selected=0;
 
    entry_text = gtk_entry_get_text(GTK_ENTRY(port_entry));
 
    for (i=0; port_choices[i]; i++) {
-      port_menu_item[i] = gtk_radio_menu_item_new_with_label(group, port_choices[i]);
-      group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(port_menu_item[i]));
-      gtk_menu_append(GTK_MENU(menu), port_menu_item[i]);
-
+       gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (*port_menu), port_choices[i]);
       if (!strcmp(entry_text, port_choices[i])) {
-         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(port_menu_item[i]), TRUE);
+          gtk_combo_box_set_active(GTK_COMBO_BOX (*port_menu),i);
          selected=i;
       }
 
       /* We don't want a callback if "other" is selected */
       if (i) {
-         g_signal_connect(G_OBJECT(port_menu_item[i]), "activate",
-                            G_CALLBACK(cb_serial_port_menu),
+          g_signal_connect(G_OBJECT(port_menu_item[i]), "changed",
+                           G_CALLBACK(cb_serial_port_menu),
                             GINT_TO_POINTER(i));
       }
 
@@ -158,21 +155,22 @@ static int make_serial_port_menu(GtkWidget **port_menu)
 
 /* End Sync Port Menu code */
 
-static void cb_pref_menu(GtkWidget *widget, gpointer data)
+static void cb_pref_menu(GtkComboBox *widget, gpointer data)
 {
    int pref;
    int value;
 
    if (!widget)
       return;
-   if (!(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))) {
-      return;
+   if(gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0){
+       return;
    }
+
 
    pref = GPOINTER_TO_INT(data);
    value = pref & 0xFF;
    pref = pref >> 8;
-   set_pref_possibility(pref, value, TRUE);
+   set_pref_possibility(pref, gtk_combo_box_get_active(GTK_COMBO_BOX(widget)), TRUE);
    jp_logf(JP_LOG_DEBUG, "pref %d, value %d\n", pref, value);
 #ifdef COLORS
    if (pref==PREF_RCFILE) {
@@ -197,11 +195,10 @@ int make_pref_menu(GtkWidget **pref_menu, int pref_num)
 
    time(&ltime);
    now = localtime(&ltime);
+   *pref_menu = gtk_combo_box_text_new();
 
-   *pref_menu = gtk_option_menu_new();
-
-   menu = gtk_menu_new();
-   group = NULL;
+   //menu = gtk_menu_new();
+   ///group = NULL;
 
    get_pref(pref_num, &ivalue, &svalue);
 
@@ -222,21 +219,18 @@ int make_pref_menu(GtkWidget **pref_menu, int pref_num)
          strncpy(human_text, format_text, MAX_PREF_LEN);
          break;
       }
-      menu_item = gtk_radio_menu_item_new_with_label(
-                     group, human_text);
-      group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(menu_item));
-      gtk_menu_append(GTK_MENU(menu), menu_item);
+       gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT (*pref_menu), human_text);
 
       if (ivalue == i) {
-         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), ivalue);
+          gtk_combo_box_set_active(GTK_COMBO_BOX (*pref_menu),i);
       }
+      g_signal_connect(G_OBJECT(*pref_menu),"changed",G_CALLBACK(cb_pref_menu),
+                       GINT_TO_POINTER(((pref_num*0x100) + (i & 0xFF))));
 
-      g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(cb_pref_menu),
-                         GINT_TO_POINTER(((pref_num*0x100) + (i & 0xFF))));
 
-      gtk_widget_show(menu_item);
+     // gtk_widget_show(menu_item);
    }
-   gtk_option_menu_set_menu(GTK_OPTION_MENU(*pref_menu), menu);
+   //gtk_option_menu_set_menu(GTK_(*pref_menu), menu);
 
    return EXIT_SUCCESS;
 }
