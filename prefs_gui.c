@@ -142,7 +142,7 @@ static int make_serial_port_menu(GtkWidget **port_menu)
 
       /* We don't want a callback if "other" is selected */
       if (i) {
-         gtk_signal_connect(G_OBJECT(port_menu_item[i]), "activate",
+         g_signal_connect(G_OBJECT(port_menu_item[i]), "activate",
                             G_CALLBACK(cb_serial_port_menu),
                             GINT_TO_POINTER(i));
       }
@@ -231,7 +231,7 @@ int make_pref_menu(GtkWidget **pref_menu, int pref_num)
          gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), ivalue);
       }
 
-      gtk_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(cb_pref_menu),
+      g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(cb_pref_menu),
                          GINT_TO_POINTER(((pref_num*0x100) + (i & 0xFF))));
 
       gtk_widget_show(menu_item);
@@ -395,7 +395,7 @@ static void add_checkbutton(const char *text,
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton), TRUE);
 
    /* Set button callback */
-   gtk_signal_connect(G_OBJECT(checkbutton), "clicked", G_CALLBACK(cb),
+   g_signal_connect(G_OBJECT(checkbutton), "clicked", G_CALLBACK(cb),
                       GINT_TO_POINTER(which));
 }
 
@@ -451,7 +451,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    g_snprintf(temp, sizeof(temp), "%s %s", PN, _("Preferences"));
    gtk_window_set_title(GTK_WINDOW(window), temp);
 
-   gtk_signal_connect(G_OBJECT(window), "destroy",
+   g_signal_connect(G_OBJECT(window), "destroy",
                       G_CALLBACK(cb_destroy), window);
 
    vbox = gtk_vbox_new(FALSE, 5);
@@ -590,7 +590,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    if (cstr) {
       gtk_entry_set_text(GTK_ENTRY(port_entry), cstr);
    }
-   gtk_signal_connect(G_OBJECT(port_entry),
+   g_signal_connect(G_OBJECT(port_entry),
                       "changed", G_CALLBACK(cb_text_entry),
                       GINT_TO_POINTER(PREF_PORT));
 
@@ -634,7 +634,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    get_pref(PREF_NUM_BACKUPS, &ivalue, NULL);
    sprintf(temp_str, "%ld", ivalue);
    gtk_entry_set_text(GTK_ENTRY(backups_entry), temp_str);
-   gtk_signal_connect(G_OBJECT(backups_entry),
+   g_signal_connect(G_OBJECT(backups_entry),
                       "changed", G_CALLBACK(cb_backups_entry),
                       NULL);
 
@@ -663,19 +663,19 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    group = NULL;
    radio_button_datebook_version[0] = 
      gtk_radio_button_new_with_label(group, _("Use Datebook database (Palm OS < 5.2.1)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_datebook_version[0]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_datebook_version[0]));
    radio_button_datebook_version[1] = 
      gtk_radio_button_new_with_label(group, _("Use Calendar database (Palm OS > 5.2)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_datebook_version[1]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_datebook_version[1]));
    gtk_box_pack_start(GTK_BOX(vbox_datebook), radio_button_datebook_version[0],
                       FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbox_datebook), radio_button_datebook_version[1],
                       FALSE, FALSE, 0);
 
-   gtk_signal_connect(G_OBJECT(radio_button_datebook_version[0]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_datebook_version[0]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_DATEBOOK_VERSION<<16)|0));
-   gtk_signal_connect(G_OBJECT(radio_button_datebook_version[1]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_datebook_version[1]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_DATEBOOK_VERSION<<16)|1));
 
@@ -722,19 +722,19 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    group = NULL;
    radio_button_address_version[0] = 
      gtk_radio_button_new_with_label(group, _("Use Address database (Palm OS < 5.2.1)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_address_version[0]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_address_version[0]));
    radio_button_address_version[1] = 
      gtk_radio_button_new_with_label(group, _("Use Contacts database (Palm OS > 5.2)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_address_version[1]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_address_version[1]));
    gtk_box_pack_start(GTK_BOX(vbox_address), radio_button_address_version[0],
                       FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbox_address), radio_button_address_version[1],
                       FALSE, FALSE, 0);
 
-   gtk_signal_connect(G_OBJECT(radio_button_address_version[0]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_address_version[0]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_ADDRESS_VERSION<<16)|0));
-   gtk_signal_connect(G_OBJECT(radio_button_address_version[1]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_address_version[1]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_ADDRESS_VERSION<<16)|1));
 
@@ -762,7 +762,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    if (cstr) {
       gtk_entry_set_text(GTK_ENTRY(mail_command_entry), cstr);
    }
-   gtk_signal_connect(G_OBJECT(mail_command_entry),
+   g_signal_connect(G_OBJECT(mail_command_entry),
                       "changed", G_CALLBACK(cb_text_entry),
                       GINT_TO_POINTER(PREF_MAIL_COMMAND));
    gtk_box_pack_start(GTK_BOX(hbox_temp), mail_command_entry, TRUE, TRUE, 1);
@@ -780,19 +780,19 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    group = NULL;
    radio_button_task_version[0] = 
      gtk_radio_button_new_with_label(group, _("Use ToDo database (Palm OS < 5.2.1)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_todo_version[0]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_todo_version[0]));
    radio_button_todo_version[1] = 
      gtk_radio_button_new_with_label(group, _("Use Task database (Palm OS > 5.2)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_todo_version[1]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_todo_version[1]));
    gtk_box_pack_start(GTK_BOX(vbox_todo), radio_button_todo_version[0],
                       FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbox_todo), radio_button_todo_version[1],
                       FALSE, FALSE, 0);
 
-   gtk_signal_connect(G_OBJECT(radio_button_todo_version[0]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_todo_version[0]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_TODO_VERSION<<16)|0));
-   gtk_signal_connect(G_OBJECT(radio_button_todo_version[1]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_todo_version[1]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_TODO_VERSION<<16)|1));
 
@@ -841,7 +841,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
       gtk_entry_set_text(GTK_ENTRY(todo_days_due_entry), temp);
    gtk_box_pack_start(GTK_BOX(hbox_temp), todo_days_due_entry, FALSE, FALSE, 0);
 
-   gtk_signal_connect(G_OBJECT(todo_days_due_entry),
+   g_signal_connect(G_OBJECT(todo_days_due_entry),
                       "changed", G_CALLBACK(cb_checkbox_todo_days_till_due),
                       NULL);
 
@@ -853,13 +853,13 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    group = NULL;
    radio_button_memo_version[0] = 
      gtk_radio_button_new_with_label(group, _("Use Memo database (Palm OS < 5.2.1)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_memo_version[0]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_memo_version[0]));
    radio_button_memo_version[1] = 
      gtk_radio_button_new_with_label(group, _("Use Memos database (Palm OS > 5.2)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_memo_version[1]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_memo_version[1]));
    radio_button_memo_version[2] = 
      gtk_radio_button_new_with_label(group, _("Use Memo32 database (pedit32)"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_memo_version[2]));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_memo_version[2]));
    gtk_box_pack_start(GTK_BOX(vbox_memo), radio_button_memo_version[0],
                       FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbox_memo), radio_button_memo_version[1],
@@ -867,13 +867,13 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    gtk_box_pack_start(GTK_BOX(vbox_memo), radio_button_memo_version[2],
                       FALSE, FALSE, 0);
 
-   gtk_signal_connect(G_OBJECT(radio_button_memo_version[0]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_memo_version[0]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_MEMO_VERSION<<16)|0));
-   gtk_signal_connect(G_OBJECT(radio_button_memo_version[1]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_memo_version[1]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_MEMO_VERSION<<16)|1));
-   gtk_signal_connect(G_OBJECT(radio_button_memo_version[2]), "pressed",
+   g_signal_connect(G_OBJECT(radio_button_memo_version[2]), "pressed",
                       G_CALLBACK(cb_radio_set_pref),
                       GINT_TO_POINTER((PREF_MEMO_VERSION<<16)|2));
 
@@ -906,7 +906,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    if (cstr) {
       gtk_entry_set_text(GTK_ENTRY(ext_editor_entry), cstr);
    }
-   gtk_signal_connect(G_OBJECT(ext_editor_entry),
+   g_signal_connect(G_OBJECT(ext_editor_entry),
                       "changed", G_CALLBACK(cb_text_entry),
                       GINT_TO_POINTER(PREF_EXTERNAL_EDITOR));
    gtk_box_pack_start(GTK_BOX(hbox_temp), ext_editor_entry, TRUE, TRUE, 1);
@@ -943,7 +943,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    if (cstr) {
       gtk_entry_set_text(GTK_ENTRY(alarm_command_entry), cstr);
    }
-   gtk_signal_connect(G_OBJECT(alarm_command_entry),
+   g_signal_connect(G_OBJECT(alarm_command_entry),
                       "changed", G_CALLBACK(cb_text_entry),
                       GINT_TO_POINTER(PREF_ALARM_COMMAND));
    gtk_box_pack_start(GTK_BOX(hbox_temp), alarm_command_entry, FALSE, FALSE, 0);
@@ -1023,7 +1023,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
             if (Pplugin->sync_on) {
                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton), TRUE);
             }
-            gtk_signal_connect(G_OBJECT(checkbutton), "clicked",
+            g_signal_connect(G_OBJECT(checkbutton), "clicked",
                                G_CALLBACK(cb_sync_plugin),
                                GINT_TO_POINTER(Pplugin->number));
          }
@@ -1038,7 +1038,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
    gtk_box_pack_start(GTK_BOX(vbox), hbox_temp, FALSE, FALSE, 1);
 
    button = gtk_button_new_from_stock(GTK_STOCK_OK);
-   gtk_signal_connect(G_OBJECT(button), "clicked",
+   g_signal_connect(G_OBJECT(button), "clicked",
                       G_CALLBACK(cb_quit), window);
    gtk_box_pack_end(GTK_BOX(hbox_temp), button, FALSE, FALSE, 0);
 

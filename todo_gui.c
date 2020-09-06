@@ -327,13 +327,13 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
             if (todo_cat_menu_item2[i]) {
-                gtk_signal_connect(G_OBJECT(todo_cat_menu_item2[i]), "toggled",
+                g_signal_connect(G_OBJECT(todo_cat_menu_item2[i]), "toggled",
                                    G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < NUM_TODO_PRIORITIES; i++) {
             if (radio_button_todo[i]) {
-                gtk_signal_connect(G_OBJECT(radio_button_todo[i]), "toggled",
+                g_signal_connect(G_OBJECT(radio_button_todo[i]), "toggled",
                                    G_CALLBACK(cb_record_changed), NULL);
             }
         }
@@ -342,13 +342,13 @@ static void connect_changed_signals(int con_or_dis) {
         g_signal_connect(todo_note_buffer, "changed",
                          G_CALLBACK(cb_record_changed), NULL);
 
-        gtk_signal_connect(G_OBJECT(todo_completed_checkbox), "toggled",
+        g_signal_connect(G_OBJECT(todo_completed_checkbox), "toggled",
                            G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_connect(G_OBJECT(private_checkbox), "toggled",
+        g_signal_connect(G_OBJECT(private_checkbox), "toggled",
                            G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_connect(G_OBJECT(todo_no_due_date_checkbox), "toggled",
+        g_signal_connect(G_OBJECT(todo_no_due_date_checkbox), "toggled",
                            G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_connect(G_OBJECT(due_date_button), "pressed",
+        g_signal_connect(G_OBJECT(due_date_button), "pressed",
                            G_CALLBACK(cb_record_changed), NULL);
     }
 
@@ -358,12 +358,12 @@ static void connect_changed_signals(int con_or_dis) {
 
         for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
             if (todo_cat_menu_item2[i]) {
-                gtk_signal_disconnect_by_func(G_OBJECT(todo_cat_menu_item2[i]),
+                g_signal_disconnect_by_func(G_OBJECT(todo_cat_menu_item2[i]),
                                               G_CALLBACK(cb_record_changed), NULL);
             }
         }
         for (i = 0; i < NUM_TODO_PRIORITIES; i++) {
-            gtk_signal_disconnect_by_func(G_OBJECT(radio_button_todo[i]),
+            g_signal_disconnect_by_func(G_OBJECT(radio_button_todo[i]),
                                           G_CALLBACK(cb_record_changed), NULL);
         }
         g_signal_handlers_disconnect_by_func(todo_desc_buffer,
@@ -371,13 +371,13 @@ static void connect_changed_signals(int con_or_dis) {
         g_signal_handlers_disconnect_by_func(todo_note_buffer,
                                              G_CALLBACK(cb_record_changed), NULL);
 
-        gtk_signal_disconnect_by_func(G_OBJECT(todo_completed_checkbox),
+        g_signal_disconnect_by_func(G_OBJECT(todo_completed_checkbox),
                                       G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(G_OBJECT(private_checkbox),
+        g_signal_disconnect_by_func(G_OBJECT(private_checkbox),
                                       G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(G_OBJECT(todo_no_due_date_checkbox),
+        g_signal_disconnect_by_func(G_OBJECT(todo_no_due_date_checkbox),
                                       G_CALLBACK(cb_record_changed), NULL);
-        gtk_signal_disconnect_by_func(G_OBJECT(due_date_button),
+        g_signal_disconnect_by_func(G_OBJECT(due_date_button),
                                       G_CALLBACK(cb_record_changed), NULL);
     }
 }
@@ -2477,26 +2477,26 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
 
     /* Cancel button */
     CREATE_BUTTON(cancel_record_button, _("Cancel"), CANCEL, _("Cancel the modifications"), GDK_Escape, 0, "ESC")
-    gtk_signal_connect(G_OBJECT(cancel_record_button), "clicked",
+    g_signal_connect(G_OBJECT(cancel_record_button), "clicked",
                        G_CALLBACK(cb_cancel), NULL);
 
     /* Delete button */
     CREATE_BUTTON(delete_record_button, _("Delete"), DELETE, _("Delete the selected record"), GDK_d, GDK_CONTROL_MASK,
                   "Ctrl+D")
-    gtk_signal_connect(G_OBJECT(delete_record_button), "clicked",
+    g_signal_connect(G_OBJECT(delete_record_button), "clicked",
                        G_CALLBACK(cb_delete_todo),
                        GINT_TO_POINTER(DELETE_FLAG));
 
     /* Undelete Button */
     CREATE_BUTTON(undelete_record_button, _("Undelete"), UNDELETE, _("Undelete the selected record"), 0, 0, "")
-    gtk_signal_connect(G_OBJECT(undelete_record_button), "clicked",
+    g_signal_connect(G_OBJECT(undelete_record_button), "clicked",
                        G_CALLBACK(cb_undelete_todo),
                        GINT_TO_POINTER(UNDELETE_FLAG));
 
     /* Copy button */
     CREATE_BUTTON(copy_record_button, _("Copy"), COPY, _("Copy the selected record"), GDK_c,
                   GDK_CONTROL_MASK | GDK_SHIFT_MASK, "Ctrl+Shift+C")
-    gtk_signal_connect(G_OBJECT(copy_record_button), "clicked",
+    g_signal_connect(G_OBJECT(copy_record_button), "clicked",
                        G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(COPY_FLAG));
 
@@ -2509,7 +2509,7 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     /* "Add Record" button */
     CREATE_BUTTON(add_record_button, _("Add Record"), ADD, _("Add the new record"), GDK_KEY_Return, GDK_CONTROL_MASK,
                   "Ctrl+Enter")
-    gtk_signal_connect(G_OBJECT(add_record_button), "clicked",
+    g_signal_connect(G_OBJECT(add_record_button), "clicked",
                        G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(NEW_FLAG));
 #ifndef ENABLE_STOCK_BUTTONS
@@ -2520,7 +2520,7 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     /* "Apply Changes" button */
     CREATE_BUTTON(apply_record_button, _("Apply Changes"), APPLY, _("Commit the modifications"), GDK_KEY_Return,
                   GDK_CONTROL_MASK, "Ctrl+Enter")
-    gtk_signal_connect(G_OBJECT(apply_record_button), "clicked",
+    g_signal_connect(G_OBJECT(apply_record_button), "clicked",
                        G_CALLBACK(cb_add_new_record),
                        GINT_TO_POINTER(MODIFY_FLAG));
 #ifndef ENABLE_STOCK_BUTTONS
@@ -2564,7 +2564,7 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     for (i = 0; i < NUM_TODO_PRIORITIES; i++) {
         sprintf(str, "%d", i + 1);
         radio_button_todo[i] = gtk_radio_button_new_with_label(group, str);
-        group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio_button_todo[i]));
+        group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio_button_todo[i]));
         gtk_widget_add_accelerator(radio_button_todo[i], "clicked", accel_group,
                                    (guint) GDK_KEY_1 + i, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
         gtk_box_pack_start(GTK_BOX(hbox_temp),
@@ -2585,12 +2585,12 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     /* "Date Due" button */
     due_date_button = gtk_button_new_with_label("");
     gtk_box_pack_start(GTK_BOX(hbox_temp), due_date_button, FALSE, FALSE, 5);
-    gtk_signal_connect(G_OBJECT(due_date_button), "clicked",
+    g_signal_connect(G_OBJECT(due_date_button), "clicked",
                        G_CALLBACK(cb_cal_dialog), NULL);
 
     /* "No Date" check box */
     todo_no_due_date_checkbox = gtk_check_button_new_with_label(_("No Date"));
-    gtk_signal_connect(G_OBJECT(todo_no_due_date_checkbox), "clicked",
+    g_signal_connect(G_OBJECT(todo_no_due_date_checkbox), "clicked",
                        G_CALLBACK(cb_check_button_no_due_date), NULL);
     gtk_box_pack_start(GTK_BOX(hbox_temp), todo_no_due_date_checkbox, FALSE, FALSE, 0);
 
@@ -2637,21 +2637,21 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     gtk_box_pack_start_defaults(GTK_BOX(vbox_temp), scrolled_window);
 
     /* Capture the TAB key to change focus with it */
-    gtk_signal_connect(G_OBJECT(todo_desc), "key_press_event",
+    g_signal_connect(G_OBJECT(todo_desc), "key_press_event",
                        G_CALLBACK(cb_key_pressed_tab), todo_note);
 
-    gtk_signal_connect(G_OBJECT(todo_note), "key_press_event",
+    g_signal_connect(G_OBJECT(todo_note), "key_press_event",
                        G_CALLBACK(cb_key_pressed_shift_tab), todo_desc);
 
     /* Capture the Enter & Shift-Enter key combinations to move back and
      * forth between the left- and right-hand sides of the display. */
-    gtk_signal_connect(G_OBJECT(treeView), "key_press_event",
+    g_signal_connect(G_OBJECT(treeView), "key_press_event",
                        G_CALLBACK(cb_key_pressed_left_side), todo_desc);
 
-    gtk_signal_connect(G_OBJECT(todo_desc), "key_press_event",
+    g_signal_connect(G_OBJECT(todo_desc), "key_press_event",
                        G_CALLBACK(cb_key_pressed_right_side), NULL);
 
-    gtk_signal_connect(G_OBJECT(todo_note), "key_press_event",
+    g_signal_connect(G_OBJECT(todo_note), "key_press_event",
                        G_CALLBACK(cb_key_pressed_right_side),
                        GINT_TO_POINTER(1));
 

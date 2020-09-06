@@ -190,7 +190,7 @@ static int dialog_alarm(char *title, char *reason,
                                  "title", title,
                                  NULL);
 
-   gtk_signal_connect(G_OBJECT(alarm_dialog), "destroy",
+   g_signal_connect(G_OBJECT(alarm_dialog), "destroy",
                       G_CALLBACK(cb_destroy_dialog), alarm_dialog);
 
    gtk_window_set_transient_for(GTK_WINDOW(alarm_dialog), GTK_WINDOW(window));
@@ -228,9 +228,9 @@ static int dialog_alarm(char *title, char *reason,
    gtk_box_pack_start(GTK_BOX(hbox1), vbox_temp, FALSE, TRUE, 4);
 
    radio1 = gtk_radio_button_new_with_label(NULL, _("Minutes"));
-   group = gtk_radio_button_group(GTK_RADIO_BUTTON(radio1));
+   group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio1));
    radio2 = gtk_radio_button_new_with_label(group, _("Hours"));
-   gtk_radio_button_group(GTK_RADIO_BUTTON(radio2));
+   gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio2));
 
    gtk_box_pack_start(GTK_BOX(vbox_temp), radio1, TRUE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(vbox_temp), radio2, TRUE, TRUE, 0);
@@ -251,13 +251,13 @@ static int dialog_alarm(char *title, char *reason,
    gtk_container_set_border_width(GTK_CONTAINER(hbox1), 12);
 
    button = gtk_button_new_with_label(_("Remind me"));
-   gtk_signal_connect(G_OBJECT(button), "clicked",
+   g_signal_connect(G_OBJECT(button), "clicked",
                       G_CALLBACK(cb_dialog_button),
                       GINT_TO_POINTER(DIALOG_SAID_2));
    gtk_box_pack_start(GTK_BOX(hbox1), button, TRUE, TRUE, 4);
 
    button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-   gtk_signal_connect(G_OBJECT(button), "clicked",
+   g_signal_connect(G_OBJECT(button), "clicked",
                       G_CALLBACK(cb_dialog_button),
                       GINT_TO_POINTER(DIALOG_SAID_1));
    gtk_box_pack_start(GTK_BOX(hbox1), button, TRUE, TRUE, 4);
