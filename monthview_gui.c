@@ -68,7 +68,8 @@ static gboolean cb_destroy(GtkWidget *widget)
       gstr = g_object_get_data(G_OBJECT(text), "gstr");
       if (gstr) {
          g_string_free(gstr, TRUE);
-         g_object_remove_data(G_OBJECT(text), "gstr");
+         g_object_set_data(G_OBJECT(text),"gstr",NULL);
+
       }
    }
    return FALSE;
@@ -317,7 +318,8 @@ static int display_months_appts(struct tm *date_in, GtkWidget **day_texts)
       gstr = g_object_get_data(G_OBJECT(temp_text), "gstr");
       if (gstr) {
          g_string_free(gstr, TRUE);
-         g_object_remove_data(G_OBJECT(temp_text), "gstr");
+          g_object_set_data(G_OBJECT(temp_text),"gstr",NULL);
+
       }
    }
 
