@@ -398,16 +398,16 @@ static void cb_quit(GtkWidget *widget, gpointer data) {
 
     window = gtk_widget_get_toplevel(widget);
 
-    Preturn_code = G_OBJECT_get_data(G_OBJECT(window), "return_code");
+    Preturn_code = gtk_object_get_data(G_OBJECT(window), "return_code");
     if (Preturn_code) *Preturn_code = GPOINTER_TO_INT(data);
-    cal = G_OBJECT_get_data(G_OBJECT(window), "cal");
+    cal = gtk_object_get_data(G_OBJECT(window), "cal");
 
     if (Preturn_code && *Preturn_code == CAL_DONE) {
         if (cal) {
             gtk_calendar_get_date(GTK_CALENDAR(cal), &y, &m, &d);
-            Pm = G_OBJECT_get_data(G_OBJECT(window), "mon");
-            Pd = G_OBJECT_get_data(G_OBJECT(window), "day");
-            Py = G_OBJECT_get_data(G_OBJECT(window), "year");
+            Pm = gtk_object_get_data(G_OBJECT(window), "mon");
+            Pd = gtk_object_get_data(G_OBJECT(window), "day");
+            Py = gtk_object_get_data(G_OBJECT(window), "year");
             if (Pm) *Pm = m;
             if (Pd) *Pd = d;
             if (Py) *Py = y;

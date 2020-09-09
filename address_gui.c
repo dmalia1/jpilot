@@ -2479,7 +2479,7 @@ static void cb_dial_or_mail(GtkWidget *widget, gpointer data) {
     if (!str) return;
     printf("[%s]\n", str);
 
-    is_mail = GPOINTER_TO_INT(G_OBJECT_get_data(G_OBJECT(widget), "mail"));
+    is_mail = GPOINTER_TO_INT(gtk_object_get_data(G_OBJECT(widget), "mail"));
     if (is_mail) {
         email_contact(widget, str);
     } else {
@@ -2803,7 +2803,7 @@ static void cb_photo_browse_ok(GtkWidget *widget, gpointer data) {
     sel = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (widget));
     set_pref(PREF_CONTACTS_PHOTO_FILENAME, 0, sel, TRUE);
 
-    Pselection = g_object_get_data(G_OBJECT(GTK_FILE_CHOOSER(widget)), "selection");
+    Pselection = gtk_object_get_data(G_OBJECT(GTK_FILE_CHOOSER(widget)), "selection");
     if (Pselection) {
         jp_logf(JP_LOG_DEBUG, "setting selection to %s\n", sel);
         *Pselection = strdup(sel);

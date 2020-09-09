@@ -111,7 +111,7 @@ static void cb_dialog_button(GtkWidget *widget, gpointer data)
    GtkWidget *w;
 
    w = gtk_widget_get_toplevel(widget);
-   Pdata = G_OBJECT_get_data(G_OBJECT(w), "alarm");
+   Pdata = gtk_object_get_data(G_OBJECT(w), "alarm");
    if (Pdata) {
       Pdata->button_hit = GPOINTER_TO_INT(data);
    }
@@ -129,7 +129,7 @@ static gboolean cb_destroy_dialog(GtkWidget *widget)
 #ifdef ALARMS_DEBUG
    printf("total_alarm_windows=%d\n",total_alarm_windows);
 #endif
-   Pdata = G_OBJECT_get_data(G_OBJECT(widget), "alarm");
+   Pdata = gtk_object_get_data(G_OBJECT(widget), "alarm");
    if (!Pdata) {
       return FALSE;
    }

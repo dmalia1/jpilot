@@ -48,7 +48,6 @@ extern unsigned char skip_plugins;
 
 /* Sync Port Menu */
 static GtkWidget *port_menu;
-static GtkWidget *port_menu_item[10];
 static const char *port_choices[]={
    "other", "usb:",
    "/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3",
@@ -99,7 +98,8 @@ static void cb_serial_port_menu(GtkComboBox *widget,
 {
    if (!widget)
       return;
-    if(gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0){
+   /* We don't want a callback if "other" is selected */
+    if(gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) <= 0){
         return;
     }
 
@@ -136,16 +136,10 @@ static int make_serial_port_menu(GtkWidget **port_menu)
           gtk_combo_box_set_active(GTK_COMBO_BOX (*port_menu),i);
          selected=i;
       }
-
-      /* We don't want a callback if "other" is selected */
-      if (i) {
-          g_signal_connect(G_OBJECT(port_menu_item[i]), "changed",
-                           G_CALLBACK(cb_serial_port_menu),
-                            GINT_TO_POINTER(i));
-      }
-
-      gtk_widget_show(port_menu_item[i]);
    }
+   g_signal_connect(G_OBJECT(*port_menu), "changed",
+                    G_CALLBACK(cb_serial_port_menu),
+                    NULL);
     gtk_combo_box_set_active(GTK_COMBO_BOX(*port_menu),selected);
 
    return EXIT_SUCCESS;
@@ -277,18 +271,16 @@ static void cb_text_entry(GtkWidget *widget, gpointer data)
    set_pref(GPOINTER_TO_INT(data), 0, entry_text, FALSE);
 
    if (GPOINTER_TO_INT(data) == PREF_PORT) {
-      if (GTK_IS_WIDGET(port_menu_item[0])) {
+      if (GTK_IS_WIDGET(port_menu)) {
          found=0;
          for (i=0; port_choices[i]; i++) {
             if (!strcmp(entry_text, port_choices[i])) {
-               gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(port_menu_item[i]), TRUE);
-               gtk_option_menu_set_history(GTK_OPTION_MENU(port_menu), i);
+               gtk_combo_box_set_active(GTK_COMBO_BOX(port_menu),1);
                found=1;
             }
          }
          if (!found) {
-            gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(port_menu_item[0]), TRUE);
-            gtk_option_menu_set_history(GTK_OPTION_MENU(port_menu), 0);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(port_menu),0);
          }
       }
    }
@@ -507,8 +499,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              1, 2, 0, 1);
 
    get_pref(PREF_CHAR_SET, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(pref_menu), ivalue);
-
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
    /* Shortdate */
    label = gtk_label_new(_("Short date format"));
    gtk_table_attach_defaults(GTK_TABLE(table), GTK_WIDGET(label),
@@ -520,7 +511,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              1, 2, 1, 2);
 
    get_pref(PREF_SHORTDATE, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(pref_menu), ivalue);
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
 
    /* Longdate */
    label = gtk_label_new(_("Long date format"));
@@ -533,7 +524,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              1, 2, 2, 3);
 
    get_pref(PREF_LONGDATE, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(pref_menu), ivalue);
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
 
    /* Time */
    label = gtk_label_new(_("Time format"));
@@ -546,7 +537,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              1, 2, 3, 4);
 
    get_pref(PREF_TIME, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(pref_menu), ivalue);
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
 
    /**********************************************************************/
    /* Settings preference tab */
@@ -566,7 +557,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              2, 3, 0, 1);
 
    get_pref(PREF_RCFILE, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(pref_menu), ivalue);
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
 
    /* Port */
    label = gtk_label_new(_("Sync Port"));
@@ -603,7 +594,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
                              2, 3, 2, 3);
 
    get_pref(PREF_RATE, &ivalue, NULL);
-   gtk_option_menu_set_history(GTK_OPTION_MENU(rate_menu), ivalue);
+   gtk_combo_box_set_active(GTK_COMBO_BOX(pref_menu),ivalue);
 
    /* Disable Serial Rate menu if sync port is USB */
    if (! strcmp(cstr, "usb:")) {
