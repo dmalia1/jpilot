@@ -141,8 +141,6 @@ const char *date_formats[] = {
 /* Left-hand side of GUI */
 static struct sorted_cats sort_l[NUM_EXP_CAT_ITEMS];
 static GtkWidget *category_menu1;
-/* Need two extra slots for the ALL category and Edit Categories... */
-static GtkWidget *exp_cat_menu_item1[NUM_EXP_CAT_ITEMS + 2];
 static GtkWidget *scrolled_window;
 static GtkTreeView *treeView;
 static GtkListStore *listStore;
@@ -155,13 +153,9 @@ static GtkWidget *delete_record_button;
 static GtkWidget *copy_record_button;
 static GtkWidget *table;
 static GtkWidget *category_menu2;
-static GtkWidget *exp_cat_menu_item2[NUM_EXP_CAT_ITEMS];
 static GtkWidget *menu_payment;
-static GtkWidget *menu_item_payment[MAX_PAYMENTS];
 static GtkWidget *menu_expense_type;
-static GtkWidget *menu_item_expense_type[MAX_EXPENSE_TYPES];
 static GtkWidget *menu_currency;
-static GtkWidget *menu_item_currency[MAX_CURRENCYS];
 static GtkWidget *spinner_mon, *spinner_day, *spinner_year;
 static GtkAdjustment *adj_mon, *adj_day, *adj_year;
 static GtkWidget *entry_amount;
@@ -209,14 +203,13 @@ static void connect_changed_signals(int con_or_dis);
 
 static void cb_add_new_record(GtkWidget *widget, gpointer data);
 
-static void cb_pulldown_menu(GtkWidget *item, unsigned int value);
+static void cb_pulldown_menu(GtkComboBox *item, unsigned int value);
 
-static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_menu,
-                     GtkWidget *menu_items[]);
+static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_menu);
 
 static int expense_find(int unique_id);
 
-static void cb_category(GtkWidget *item, int selection);
+static void cb_category(GtkComboBox *item, int selection);
 
 static int find_sort_cat_pos(int cat);
 
@@ -359,35 +352,17 @@ static void connect_changed_signals(int con_or_dis) {
         jp_logf(JP_LOG_DEBUG, "Expense: connect_changed_signals\n");
         connected = 1;
 
-        for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
-            if (exp_cat_menu_item2[i]) {
-                g_signal_connect(G_OBJECT(exp_cat_menu_item2[i]), "toggled",
-                                   G_CALLBACK(cb_record_changed), NULL);
-            }
+        if(category_menu2){
+            g_signal_connect(G_OBJECT(category_menu2),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
-        for (i = 0; i < MAX_EXPENSE_TYPES; i++) {
-            if (menu_item_expense_type[i]) {
-                g_signal_connect(G_OBJECT(menu_item_expense_type[i]),
-                                   "toggled",
-                                   G_CALLBACK(cb_record_changed),
-                                   NULL);
-            }
+        if(menu_expense_type){
+            g_signal_connect(G_OBJECT(menu_expense_type),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
-        for (i = 0; i < MAX_PAYMENTS; i++) {
-            if (menu_item_payment[i]) {
-                g_signal_connect(G_OBJECT(menu_item_payment[i]),
-                                   "toggled",
-                                   G_CALLBACK(cb_record_changed),
-                                   NULL);
-            }
+        if(menu_payment){
+            g_signal_connect(G_OBJECT(menu_payment),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
-        for (i = 0; i < MAX_CURRENCYS; i++) {
-            if (menu_item_currency[i]) {
-                g_signal_connect(G_OBJECT(menu_item_currency[i]),
-                                   "toggled",
-                                   G_CALLBACK(cb_record_changed),
-                                   NULL);
-            }
+        if(menu_currency){
+            g_signal_connect(G_OBJECT(menu_currency),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
         g_signal_connect(G_OBJECT(spinner_mon), "changed",
                            G_CALLBACK(cb_record_changed), NULL);
@@ -412,29 +387,21 @@ static void connect_changed_signals(int con_or_dis) {
         jp_logf(JP_LOG_DEBUG, "Expense: disconnect_changed_signals\n");
         connected = 0;
 
-        for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
-            if (exp_cat_menu_item2[i]) {
-                g_signal_handlers_disconnect_by_func(G_OBJECT(exp_cat_menu_item2[i]),
-                                              G_CALLBACK(cb_record_changed), NULL);
-            }
+        if(category_menu2){
+            g_signal_connect(G_OBJECT(category_menu2),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
-        for (i = 0; i < MAX_EXPENSE_TYPES; i++) {
-            if (menu_item_expense_type[i]) {
-                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_expense_type[i]),
-                                              G_CALLBACK(cb_record_changed), NULL);
-            }
+
+        if(menu_expense_type){
+            g_signal_handlers_disconnect_by_func(G_OBJECT(menu_expense_type),
+                                                 G_CALLBACK(cb_record_changed), NULL);
         }
-        for (i = 0; i < MAX_PAYMENTS; i++) {
-            if (menu_item_payment[i]) {
-                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_payment[i]),
-                                              G_CALLBACK(cb_record_changed), NULL);
-            }
+        if(menu_payment){
+            g_signal_handlers_disconnect_by_func(G_OBJECT(menu_payment),
+                                                 G_CALLBACK(cb_record_changed), NULL);
         }
-        for (i = 0; i < MAX_CURRENCYS; i++) {
-            if (menu_item_currency[i]) {
-                g_signal_handlers_disconnect_by_func(G_OBJECT(menu_item_currency[i]),
-                                              G_CALLBACK(cb_record_changed), NULL);
-            }
+        if(menu_currency){
+            g_signal_handlers_disconnect_by_func(G_OBJECT(menu_currency),
+                                                 G_CALLBACK(cb_record_changed), NULL);
         }
         g_signal_handlers_disconnect_by_func(G_OBJECT(spinner_mon),
                                       G_CALLBACK(cb_record_changed), NULL);
@@ -680,10 +647,7 @@ static void exp_clear_details(void) {
     if (sorted_position < 0) {
         jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
     } else {
-        gtk_check_menu_item_set_active
-                (GTK_CHECK_MENU_ITEM(exp_cat_menu_item2[sorted_position]), TRUE);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu2),
-                                    (guint) find_menu_cat_pos(sorted_position));
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu2),find_menu_cat_pos(sorted_position));
     }
 
     set_new_button_to(CLEAR_FLAG);
@@ -829,14 +793,10 @@ void addNewExpenseRecordToDataStructure(struct MyExpense *mexp, gpointer data) {
 
     /* Any attributes go here.  Usually just the category */
     /* Get the category that is set from the menu */
-    for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
-        if (GTK_IS_WIDGET(exp_cat_menu_item2[i])) {
-            if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(exp_cat_menu_item2[i]))) {
-                br.attrib = (unsigned char) sort_l[i].cat_num;
-                break;
-            }
-        }
+    if (GTK_IS_WIDGET(category_menu2)) {
+        br.attrib = get_selected_category_from_combo_box(GTK_COMBO_BOX(category_menu2));
     }
+
     jp_logf(JP_LOG_DEBUG, "category is %d\n", br.attrib);
     br.buf = buf;
     br.size = size;
@@ -1106,10 +1066,18 @@ static void cb_edit_cats(GtkWidget *widget, gpointer data) {
 }
 
 /* Called when left-hand category menu is used */
-static void cb_category(GtkWidget *item, int selection) {
+static void cb_category(GtkComboBox *item, int selection) {
     int b;
-    if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item))) {
-        if (exp_category == selection) { return; }
+    if (!item) return;
+    if (gtk_combo_box_get_active(GTK_COMBO_BOX(item)) < 0) {
+        return;
+    }
+    int selectedItem = get_selected_category_from_combo_box(item);
+    if (selectedItem == -1) {
+        return;
+    }
+
+        if (exp_category == selectedItem) { return; }
 
         b = dialog_save_changed_record_with_cancel(pane, record_changed);
         if (b == DIALOG_SAID_1) { /* Cancel */
@@ -1127,9 +1095,7 @@ static void cb_category(GtkWidget *item, int selection) {
             if (index < 0) {
                 jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
             } else {
-                gtk_check_menu_item_set_active
-                        (GTK_CHECK_MENU_ITEM(exp_cat_menu_item1[index]), TRUE);
-                gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu1), (guint) index2);
+                gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu1),index2);
             }
 
             return;
@@ -1138,17 +1104,17 @@ static void cb_category(GtkWidget *item, int selection) {
             cb_add_new_record(NULL, GINT_TO_POINTER(record_changed));
         }
 
-        if (selection == NUM_EXP_CAT_ITEMS + 1) {
+        if (selectedItem == CATEGORY_EDIT) {
             cb_edit_cats(item, NULL);
         } else {
-            exp_category = selection;
+            exp_category = selectedItem;
         }
         jp_logf(JP_LOG_DEBUG, "cb_category() cat=%d\n", exp_category);
 
         row_selected = 0;
         display_records();
         jp_logf(JP_LOG_DEBUG, "Leaving cb_category()\n");
-    }
+
 }
 
 static gboolean handleExpenseRowSelection(GtkTreeSelection *selection,
@@ -1195,39 +1161,30 @@ static gboolean handleExpenseRowSelection(GtkTreeSelection *selection,
 
         index = mexp->attrib & 0x0F;
         sorted_position = find_sort_cat_pos(index);
-        if (exp_cat_menu_item2[sorted_position] == NULL) {
+        int pos = findSortedPostion(sorted_position, GTK_COMBO_BOX(category_menu2));
+        if (pos != sorted_position && index != 0) {
             /* Illegal category */
             jp_logf(JP_LOG_DEBUG, "Category is not legal\n");
             sorted_position = 0;
         }
         if (sorted_position < 0) {
             jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
-        } else {
-            gtk_check_menu_item_set_active
-                    (GTK_CHECK_MENU_ITEM(exp_cat_menu_item2[sorted_position]), TRUE);
         }
-        gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu2),
-                                    (guint) find_menu_cat_pos(sorted_position));
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu2),find_menu_cat_pos(sorted_position));
 
         if (mexp->ex.type < MAX_EXPENSE_TYPES) {
-            gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM
-                                           (menu_item_expense_type[mexp->ex.type]), TRUE);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(menu_expense_type),mexp->ex.type);
         } else {
             jp_logf(JP_LOG_WARN, _("Expense: Unknown expense type\n"));
         }
         if (mexp->ex.payment < MAX_PAYMENTS) {
-            gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM
-                                           (menu_item_payment[mexp->ex.payment]), TRUE);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(menu_payment),mexp->ex.payment);
         } else {
             jp_logf(JP_LOG_WARN, _("Expense: Unknown payment type\n"));
         }
         currency_position = currency_id_to_position(mexp->ex.currency);
 
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM
-                                       (menu_item_currency[currency_position]), TRUE);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(menu_expense_type), mexp->ex.type);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(menu_payment), mexp->ex.payment);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(menu_currency), (guint) currency_position);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(menu_currency),currency_position);
 
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinner_mon), mexp->ex.date.tm_mon + 1);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinner_day), mexp->ex.date.tm_mday);
@@ -1273,21 +1230,20 @@ static gboolean handleExpenseRowSelection(GtkTreeSelection *selection,
  * All menus use this same callback function.  I use the value parameter
  * to determine which menu was changed and which item was selected from it.
  */
-static void cb_pulldown_menu(GtkWidget *item, unsigned int value) {
+static void cb_pulldown_menu(GtkComboBox *item, unsigned int value) {
     int menu, sel;
 
     jp_logf(JP_LOG_DEBUG, "Expense: cb_pulldown_menu\n");
 
-    if (!item){
+    if (!item)
         return;
-    }
-    if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item))) {
+    if(gtk_combo_box_get_active(GTK_COMBO_BOX(item)) < 0){
         return;
     }
 
-    menu = (value & 0xFF00) >> 8;
-    sel = value & 0x00FF;
 
+    sel = gtk_combo_box_get_active(GTK_COMBO_BOX(item));
+    menu = findSortedPostion(sel,GTK_COMBO_BOX(item));
     switch (menu) {
         case EXPENSE_TYPE:
             glob_detail_type = sel;
@@ -1307,8 +1263,7 @@ static void cb_pulldown_menu(GtkWidget *item, unsigned int value) {
  * Just a convenience function for passing in an array of strings and getting
  * them all stuffed into a menu.
  */
-static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_menu,
-                     GtkWidget *menu_items[]) {
+static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_menu) {
     int i, item_num;
     GSList *group;
     GtkWidget *option_menu;
@@ -1316,30 +1271,21 @@ static int make_menu(const char *items[], int menu_index, GtkWidget **Poption_me
     GtkWidget *menu;
 
     jp_logf(JP_LOG_DEBUG, "Expense: make_menu\n");
-
-    *Poption_menu = option_menu = gtk_option_menu_new();
-
-    menu = gtk_menu_new();
-
-    group = NULL;
+    GtkListStore *catListStore = gtk_list_store_new(2,G_TYPE_STRING,G_TYPE_INT);
+    GtkTreeIter iter;
 
     for (i = 0; items[i]; i++) {
-        menu_item = gtk_radio_menu_item_new_with_label(group, _(items[i]));
-        menu_items[i] = menu_item;
-        item_num = i;
-        g_signal_connect(G_OBJECT(menu_item), "activate",
-                           G_CALLBACK(cb_pulldown_menu),
-                           GINT_TO_POINTER(menu_index << 8 | item_num));
-        group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(menu_item));
-        gtk_menu_append(GTK_MENU(menu), menu_item);
-        gtk_widget_show(menu_item);
+        gtk_list_store_append (catListStore, &iter);
+        gtk_list_store_set (catListStore, &iter, 0, _(items[i]), 1, menu_index, -1);
     }
-
-    gtk_option_menu_set_menu(GTK_OPTION_MENU(option_menu), menu);
-    /* Make this one show up by default */
-    gtk_option_menu_set_history(GTK_OPTION_MENU(option_menu), 0);
-
-    gtk_widget_show(option_menu);
+    *Poption_menu =  gtk_combo_box_new_with_model (GTK_TREE_MODEL (catListStore));
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
+    gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (*Poption_menu), renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (*Poption_menu), renderer,
+                                    "text", 0,
+                                    NULL);
+    g_signal_connect(G_OBJECT( *Poption_menu),"changed",G_CALLBACK(cb_pulldown_menu),
+                     GINT_TO_POINTER(menu_index << 8 | item_num));
 
     return EXIT_SUCCESS;
 }
@@ -1409,8 +1355,9 @@ static void make_menus(void) {
     currency[MAX_CURRENCYS] = NULL;
 
     /* Do some category initialization */
-    for (i = 0; i < NUM_EXP_CAT_ITEMS; i++) {
-        exp_cat_menu_item2[i] = NULL;
+    if (category_menu2 && category_menu2 != NULL) {
+        GtkTreeModel *clearingmodel = gtk_combo_box_get_model(GTK_COMBO_BOX(category_menu2));
+        gtk_list_store_clear(GTK_LIST_STORE(clearingmodel));
     }
 
     /* This gets the application specific data out of the database for us.
@@ -1447,14 +1394,17 @@ static void make_menus(void) {
         exp_category = CATEGORY_ALL;
     }
 
-    make_category_menu(&category_menu1, exp_cat_menu_item1,
+    make_category_menu(&category_menu1,
                        sort_l, cb_category, TRUE, TRUE);
+    if(exp_category == CATEGORY_ALL){
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu1), 0);
+    }
     /* Skip the ALL category for this menu */
-    make_category_menu(&category_menu2, exp_cat_menu_item2,
+    make_category_menu(&category_menu2,
                        sort_l, NULL, FALSE, FALSE);
-    make_menu(payment, EXPENSE_PAYMENT, &menu_payment, menu_item_payment);
-    make_menu(expense_type, EXPENSE_TYPE, &menu_expense_type, menu_item_expense_type);
-    make_menu(currency, EXPENSE_CURRENCY, &menu_currency, menu_item_currency);
+    make_menu(payment, EXPENSE_PAYMENT, &menu_payment);
+    make_menu(expense_type, EXPENSE_TYPE, &menu_expense_type);
+    make_menu(currency, EXPENSE_CURRENCY, &menu_currency);
 }
 
 
@@ -1878,9 +1828,7 @@ int plugin_gui(GtkWidget *vbox, GtkWidget *hbox, unsigned int unique_id) {
         if (index < 0) {
             jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
         } else {
-            gtk_check_menu_item_set_active
-                    (GTK_CHECK_MENU_ITEM(exp_cat_menu_item1[index]), TRUE);
-            gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu1), (guint) index2);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu1),index2);
         }
     } else {
         exp_category = CATEGORY_ALL;

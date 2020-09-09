@@ -72,9 +72,6 @@ static struct tm due_date;
 static GtkWidget *due_date_button;
 static GtkWidget *todo_no_due_date_checkbox;
 static GtkWidget *radio_button_todo[NUM_TODO_PRIORITIES];
-/* Need two extra slots for the ALL category and Edit Categories... */
-static GtkWidget *todo_cat_menu_item1[NUM_TODO_CAT_ITEMS + 2];
-static GtkWidget *todo_cat_menu_item2[NUM_TODO_CAT_ITEMS];
 static GtkWidget *new_record_button;
 static GtkWidget *apply_record_button;
 static GtkWidget *add_record_button;
@@ -110,26 +107,32 @@ static void cb_add_new_record(GtkWidget *widget, gpointer data);
 static void connect_changed_signals(int con_or_dis);
 
 
-void addNewRecordToDataStructure(MyToDo * mtodo, gpointer data);
-void deleteTodo(MyToDo * mtodo, gpointer data);
-void undeleteTodo(MyToDo * mtodo, gpointer data);
-int printTodo(MyToDo * mtodo, gpointer data);
-gboolean printRecord(GtkTreeModel *model,
-                     GtkTreePath  *path,
-                     GtkTreeIter  *iter,
-                     gpointer data);
-gboolean
-findRecord (GtkTreeModel *model,
-              GtkTreePath  *path,
-              GtkTreeIter  *iter,
-              gpointer data);
-gboolean
-selectRecordByRow (GtkTreeModel *model,
-                   GtkTreePath  *path,
-                   GtkTreeIter  *iter,
-                   gpointer data);
+void addNewRecordToDataStructure(MyToDo *mtodo, gpointer data);
 
-        gint compareNoteColumn(GtkTreeModel *model, GtkTreeIter *left, GtkTreeIter *right);
+void deleteTodo(MyToDo *mtodo, gpointer data);
+
+void undeleteTodo(MyToDo *mtodo, gpointer data);
+
+int printTodo(MyToDo *mtodo, gpointer data);
+
+gboolean printRecord(GtkTreeModel *model,
+                     GtkTreePath *path,
+                     GtkTreeIter *iter,
+                     gpointer data);
+
+gboolean
+findRecord(GtkTreeModel *model,
+           GtkTreePath *path,
+           GtkTreeIter *iter,
+           gpointer data);
+
+gboolean
+selectRecordByRow(GtkTreeModel *model,
+                  GtkTreePath *path,
+                  GtkTreeIter *iter,
+                  gpointer data);
+
+gint compareNoteColumn(GtkTreeModel *model, GtkTreeIter *left, GtkTreeIter *right);
 
 gint compareCheckColumn(GtkTreeModel *model, GtkTreeIter *left, GtkTreeIter *right);
 
@@ -147,7 +150,7 @@ static void init(void) {
     memcpy(&due_date, now, sizeof(struct tm));
 
     get_pref(PREF_TODO_DAYS_TILL_DUE, &ivalue, NULL);
-    add_days_to_date(&due_date,(int) ivalue);
+    add_days_to_date(&due_date, (int) ivalue);
 
     row_selected = 0;
     column_selected = 0;
@@ -203,7 +206,7 @@ static void cb_cal_dialog(GtkWidget *widget,
     }
 }
 
-int printTodo(MyToDo * mtodo,gpointer data) {
+int printTodo(MyToDo *mtodo, gpointer data) {
     long this_many;
     ToDoList *todo_list;
     ToDoList todo_list1;
@@ -305,7 +308,7 @@ static void cb_record_changed(GtkWidget *widget,
     jp_logf(JP_LOG_DEBUG, "cb_record_changed\n");
     if (record_changed == CLEAR_FLAG) {
         connect_changed_signals(DISCONNECT_SIGNALS);
-        if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore),NULL) > 0) {
+        if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore), NULL) > 0) {
             set_new_button_to(MODIFY_FLAG);
         } else {
             set_new_button_to(NEW_FLAG);
@@ -325,11 +328,9 @@ static void connect_changed_signals(int con_or_dis) {
     if ((con_or_dis == CONNECT_SIGNALS) && (!connected)) {
         connected = 1;
 
-        for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
-            if (todo_cat_menu_item2[i]) {
-                g_signal_connect(G_OBJECT(todo_cat_menu_item2[i]), "toggled",
-                                   G_CALLBACK(cb_record_changed), NULL);
-            }
+
+        if(category_menu2){
+            g_signal_connect(G_OBJECT(category_menu2),"changed",G_CALLBACK(cb_record_changed),NULL);
         }
         for (i = 0; i < NUM_TODO_PRIORITIES; i++) {
             if (radio_button_todo[i]) {
@@ -355,12 +356,8 @@ static void connect_changed_signals(int con_or_dis) {
     /* DISCONNECT */
     if ((con_or_dis == DISCONNECT_SIGNALS) && (connected)) {
         connected = 0;
-
-        for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
-            if (todo_cat_menu_item2[i]) {
-                g_signal_handlers_disconnect_by_func(G_OBJECT(todo_cat_menu_item2[i]),
-                                              G_CALLBACK(cb_record_changed), NULL);
-            }
+        if(category_menu2) {
+            g_signal_handlers_disconnect_by_func(G_OBJECT(category_menu2), G_CALLBACK(cb_record_changed), NULL);
         }
         for (i = 0; i < NUM_TODO_PRIORITIES; i++) {
             g_signal_handlers_disconnect_by_func(G_OBJECT(radio_button_todo[i]),
@@ -539,7 +536,7 @@ static int cb_todo_import(GtkWidget *parent_window,
             if (ret == DIALOG_SAID_IMPORT_SKIP) continue;
             if (ret == DIALOG_SAID_IMPORT_ALL) import_all = TRUE;
 
-            attrib =(unsigned char)((new_cat_num & 0x0F) | (priv ? dlpRecAttrSecret : 0));
+            attrib = (unsigned char) ((new_cat_num & 0x0F) | (priv ? dlpRecAttrSecret : 0));
             if ((ret == DIALOG_SAID_IMPORT_YES) || (import_all)) {
                 pc_todo_write(&new_todo, NEW_PC_REC, attrib, NULL);
             }
@@ -596,7 +593,7 @@ static int cb_todo_import(GtkWidget *parent_window,
             if (ret == DIALOG_SAID_IMPORT_ALL) import_all = TRUE;
 
             attrib = (unsigned char) ((new_cat_num & 0x0F) |
-                     ((temp_todolist->mtodo.attrib & 0x10) ? dlpRecAttrSecret : 0));
+                                      ((temp_todolist->mtodo.attrib & 0x10) ? dlpRecAttrSecret : 0));
             if ((ret == DIALOG_SAID_IMPORT_YES) || (import_all)) {
                 pc_todo_write(&(temp_todolist->mtodo.todo), NEW_PC_REC,
                               attrib, NULL);
@@ -739,15 +736,15 @@ static void cb_todo_export_ok(GtkWidget *export_window, GtkWidget *treeView,
     }
 
     get_pref(PREF_CHAR_SET, &char_set, NULL);
-    GtkTreeSelection  * selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
-    GtkTreeModel * model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeView));
-    list = gtk_tree_selection_get_selected_rows(selection,&model);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeView));
+    list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 
     for (i = 0, temp_list = list; temp_list; temp_list = temp_list->next, i++) {
-        GtkTreePath * path = temp_list->data;
+        GtkTreePath *path = temp_list->data;
         GtkTreeIter iter;
-        if(gtk_tree_model_get_iter(model,&iter,path)) {
+        if (gtk_tree_model_get_iter(model, &iter, path)) {
             gtk_tree_model_get(model, &iter, TODO_DATA_COLUMN_ENUM, &mtodo, -1);
             if (!mtodo) {
                 continue;
@@ -880,20 +877,30 @@ static void cb_todo_export_ok(GtkWidget *export_window, GtkWidget *treeView,
 }
 
 //todo: this is used by export_gui.  ExportGui needs to be converted to liststore.
-static void cb_todo_update_listStore(GtkWidget *treeView, int category) {
-    todo_update_liststore(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeView))), NULL, &export_todo_list, category, FALSE);
+static void cb_todo_update_listStore(GtkWidget *exportTreeView, int category) {
+    if (exportTreeView == NULL || !GTK_IS_TREE_VIEW(exportTreeView)) {
+        return;
+    }
+    todo_update_liststore(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(exportTreeView))), NULL,
+                          &export_todo_list, category, FALSE);
 }
-static GtkWidget * cb_todo_init_treeView() {
-    GtkListStore *listStore = gtk_list_store_new(TODO_NUM_COLS, G_TYPE_BOOLEAN, G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING,
-                                   G_TYPE_STRING, G_TYPE_POINTER,GDK_TYPE_COLOR,G_TYPE_BOOLEAN,G_TYPE_STRING,G_TYPE_BOOLEAN);
+
+static GtkWidget *cb_todo_init_treeView() {
+    GtkListStore *listStore = gtk_list_store_new(TODO_NUM_COLS, G_TYPE_BOOLEAN, G_TYPE_STRING, GDK_TYPE_PIXBUF,
+                                                 G_TYPE_STRING,
+                                                 G_TYPE_STRING, G_TYPE_POINTER, GDK_TYPE_COLOR, G_TYPE_BOOLEAN,
+                                                 G_TYPE_STRING, G_TYPE_BOOLEAN);
     GtkTreeModel *model = GTK_TREE_MODEL(listStore);
     GtkTreeView *todo_treeView = gtk_tree_view_new_with_model(model);
     GtkCellRenderer *taskRenderer = gtk_cell_renderer_text_new();
 
     GtkTreeViewColumn *taskColumn = gtk_tree_view_column_new_with_attributes("Task",
                                                                              taskRenderer,
-                                                                             "text", TODO_TEXT_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "text", TODO_TEXT_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(taskColumn, TODO_TEXT_COLUMN_ENUM);
 
@@ -902,34 +909,48 @@ static GtkWidget * cb_todo_init_treeView() {
 
     GtkTreeViewColumn *dateColumn = gtk_tree_view_column_new_with_attributes("Due",
                                                                              dateRenderer,
-                                                                             "text", TODO_DATE_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
-                                                                             "foreground",TODO_FOREGROUND_COLOR_ENUM,
-                                                                             "foreground-set",TODO_FORGROUND_COLOR_ENABLED_ENUM,
+                                                                             "text", TODO_DATE_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "foreground", TODO_FOREGROUND_COLOR_ENUM,
+                                                                             "foreground-set",
+                                                                             TODO_FORGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(dateColumn, TODO_DATE_COLUMN_ENUM);
 
-    GtkCellRenderer *priorityRenderer  = gtk_cell_renderer_text_new();
+    GtkCellRenderer *priorityRenderer = gtk_cell_renderer_text_new();
     GtkTreeViewColumn *priorityColumn = gtk_tree_view_column_new_with_attributes("",
                                                                                  priorityRenderer,
-                                                                                 "text", TODO_PRIORITY_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                                 "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                                 "text", TODO_PRIORITY_COLUMN_ENUM,
+                                                                                 "cell-background-gdk",
+                                                                                 TODO_BACKGROUND_COLOR_ENUM,
+                                                                                 "cell-background-set",
+                                                                                 TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                                  NULL);
     gtk_tree_view_column_set_sort_column_id(priorityColumn, TODO_PRIORITY_COLUMN_ENUM);
 
-    GtkCellRenderer *noteRenderer  = gtk_cell_renderer_pixbuf_new();
+    GtkCellRenderer *noteRenderer = gtk_cell_renderer_pixbuf_new();
     GtkTreeViewColumn *noteColumn = gtk_tree_view_column_new_with_attributes("",
                                                                              noteRenderer,
-                                                                             "pixbuf", TODO_NOTE_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "pixbuf", TODO_NOTE_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(noteColumn, TODO_NOTE_COLUMN_ENUM);
 
 
     GtkCellRenderer *checkRenderer = gtk_cell_renderer_toggle_new();
 
-    GtkTreeViewColumn *checkColumn = gtk_tree_view_column_new_with_attributes("",checkRenderer,"active",TODO_CHECK_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                              "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,NULL);
+    GtkTreeViewColumn *checkColumn = gtk_tree_view_column_new_with_attributes("", checkRenderer, "active",
+                                                                              TODO_CHECK_COLUMN_ENUM,
+                                                                              "cell-background-gdk",
+                                                                              TODO_BACKGROUND_COLOR_ENUM,
+                                                                              "cell-background-set",
+                                                                              TODO_BACKGROUND_COLOR_ENABLED_ENUM, NULL);
     gtk_tree_view_insert_column(GTK_TREE_VIEW (todo_treeView), checkColumn, TODO_CHECK_COLUMN_ENUM);
     gtk_tree_view_insert_column(GTK_TREE_VIEW (todo_treeView), priorityColumn, TODO_PRIORITY_COLUMN_ENUM);
     gtk_tree_view_insert_column(GTK_TREE_VIEW (todo_treeView), noteColumn, TODO_NOTE_COLUMN_ENUM);
@@ -950,7 +971,9 @@ static GtkWidget * cb_todo_init_treeView() {
 
 static void cb_todo_export_done(GtkWidget *widget, const char *filename) {
     free_ToDoList(&export_todo_list);
-    gtk_list_store_clear(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget))));
+    if (widget != NULL && GTK_IS_TREE_VIEW(widget)) {
+        gtk_list_store_clear(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget))));
+    }
 
     set_pref(PREF_TODO_EXPORT_FILENAME, 0, filename, TRUE);
 }
@@ -1023,14 +1046,14 @@ static int find_menu_cat_pos(int cat) {
 }
 
 gboolean deleteRecord(GtkTreeModel *model,
-                       GtkTreePath  *path,
-                       GtkTreeIter  *iter,
-                       gpointer data) {
-    int * i = gtk_tree_path_get_indices ( path ) ;
-    if(i[0] == row_selected){
-        MyToDo * mytodo = NULL;
-        gtk_tree_model_get(model,iter,TODO_DATA_COLUMN_ENUM,&mytodo,-1);
-        deleteTodo(mytodo,data);
+                      GtkTreePath *path,
+                      GtkTreeIter *iter,
+                      gpointer data) {
+    int *i = gtk_tree_path_get_indices(path);
+    if (i[0] == row_selected) {
+        MyToDo *mytodo = NULL;
+        gtk_tree_model_get(model, iter, TODO_DATA_COLUMN_ENUM, &mytodo, -1);
+        deleteTodo(mytodo, data);
         return TRUE;
     }
 
@@ -1038,7 +1061,8 @@ gboolean deleteRecord(GtkTreeModel *model,
 
 
 }
-void deleteTodo(MyToDo * mtodo,gpointer data){
+
+void deleteTodo(MyToDo *mtodo, gpointer data) {
 
     int flag;
     int show_priv;
@@ -1080,37 +1104,23 @@ void deleteTodo(MyToDo * mtodo,gpointer data){
         todo_redraw();
     }
 }
+
 static void cb_delete_todo(GtkWidget *widget,
                            gpointer data) {
     gtk_tree_model_foreach(GTK_TREE_MODEL(listStore), deleteRecord, data);
     return;
 
 }
+
 gboolean undeleteRecord(GtkTreeModel *model,
-                      GtkTreePath  *path,
-                      GtkTreeIter  *iter,
-                      gpointer data) {
-    int * i = gtk_tree_path_get_indices ( path ) ;
-    if(i[0] == row_selected){
-        MyToDo * mytodo = NULL;
-        gtk_tree_model_get(model,iter,TODO_DATA_COLUMN_ENUM,&mytodo,-1);
-        undeleteTodo(mytodo,data);
-        return TRUE;
-    }
-
-    return FALSE;
-
-
-}
-gboolean printRecord(GtkTreeModel *model,
-                        GtkTreePath  *path,
-                        GtkTreeIter  *iter,
+                        GtkTreePath *path,
+                        GtkTreeIter *iter,
                         gpointer data) {
-    int * i = gtk_tree_path_get_indices ( path ) ;
-    if(i[0] == row_selected){
-        MyToDo * mytodo = NULL;
-        gtk_tree_model_get(model,iter,TODO_DATA_COLUMN_ENUM,&mytodo,-1);
-        printTodo(mytodo,data);
+    int *i = gtk_tree_path_get_indices(path);
+    if (i[0] == row_selected) {
+        MyToDo *mytodo = NULL;
+        gtk_tree_model_get(model, iter, TODO_DATA_COLUMN_ENUM, &mytodo, -1);
+        undeleteTodo(mytodo, data);
         return TRUE;
     }
 
@@ -1119,7 +1129,24 @@ gboolean printRecord(GtkTreeModel *model,
 
 }
 
-void undeleteTodo(MyToDo * mtodo,gpointer data){
+gboolean printRecord(GtkTreeModel *model,
+                     GtkTreePath *path,
+                     GtkTreeIter *iter,
+                     gpointer data) {
+    int *i = gtk_tree_path_get_indices(path);
+    if (i[0] == row_selected) {
+        MyToDo *mytodo = NULL;
+        gtk_tree_model_get(model, iter, TODO_DATA_COLUMN_ENUM, &mytodo, -1);
+        printTodo(mytodo, data);
+        return TRUE;
+    }
+
+    return FALSE;
+
+
+}
+
+void undeleteTodo(MyToDo *mtodo, gpointer data) {
     int flag;
     int show_priv;
     if (mtodo < (MyToDo *) LIST_MIN_DATA) {
@@ -1153,6 +1180,7 @@ void undeleteTodo(MyToDo * mtodo,gpointer data){
 
     todo_redraw();
 }
+
 static void cb_undelete_todo(GtkWidget *widget,
                              gpointer data) {
 
@@ -1221,48 +1249,52 @@ static void cb_edit_cats(GtkWidget *widget, gpointer data) {
     cb_app_button(NULL, GINT_TO_POINTER(REDRAW));
 }
 
-static void cb_category(GtkWidget *item, int selection) {
+static void cb_category(GtkComboBox *item, int selection) {
     int b;
-
-    if ((gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))) {
-        if (todo_category == selection) { return; }
-
-        b = dialog_save_changed_record_with_cancel(pane, record_changed);
-        if (b == DIALOG_SAID_1) { /* Cancel */
-            int index, index2;
-
-            if (todo_category == CATEGORY_ALL) {
-                index = 0;
-                index2 = 0;
-            } else {
-                index = find_sort_cat_pos(todo_category);
-                index2 = find_menu_cat_pos(index) + 1;
-                index += 1;
-            }
-
-            if (index < 0) {
-                jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
-            } else {
-                gtk_check_menu_item_set_active
-                        (GTK_CHECK_MENU_ITEM(todo_cat_menu_item1[index]), TRUE);
-                gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu1), (guint) index2);
-            }
-
-            return;
-        }
-        if (b == DIALOG_SAID_3) { /* Save */
-            cb_add_new_record(NULL, GINT_TO_POINTER(record_changed));
-        }
-
-        if (selection == NUM_TODO_CAT_ITEMS + 1) {
-            cb_edit_cats(item, NULL);
-        } else {
-            todo_category = selection;
-        }
-        row_selected = 0;
-        jp_logf(JP_LOG_DEBUG, "todo_category = %d\n", todo_category);
-        todo_update_liststore(listStore,category_menu1,&glob_todo_list,todo_category,TRUE);
+    if (!item) return;
+    if (gtk_combo_box_get_active(GTK_COMBO_BOX(item)) < 0) {
+        return;
     }
+    int selectedItem = get_selected_category_from_combo_box(item);
+    if (selectedItem == -1) {
+        return;
+    }
+
+    if (todo_category == selectedItem) { return; }
+
+    b = dialog_save_changed_record_with_cancel(pane, record_changed);
+    if (b == DIALOG_SAID_1) { /* Cancel */
+        int index, index2;
+
+        if (todo_category == CATEGORY_ALL) {
+            index = 0;
+            index2 = 0;
+        } else {
+            index = find_sort_cat_pos(todo_category);
+            index2 = find_menu_cat_pos(index) + 1;
+            index += 1;
+        }
+
+        if (index < 0) {
+            jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
+        } else {
+            gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu1), index2);
+        }
+
+        return;
+    }
+    if (b == DIALOG_SAID_3) { /* Save */
+        cb_add_new_record(NULL, GINT_TO_POINTER(record_changed));
+    }
+
+    if (selectedItem == CATEGORY_EDIT) {
+        cb_edit_cats(item, NULL);
+    } else {
+        todo_category = selectedItem;
+    }
+    row_selected = 0;
+    jp_logf(JP_LOG_DEBUG, "todo_category = %d\n", todo_category);
+    todo_update_liststore(listStore, category_menu1, &glob_todo_list, todo_category, TRUE);
 }
 
 static void cb_check_button_no_due_date(GtkWidget *widget, gpointer data) {
@@ -1335,10 +1367,7 @@ static int todo_clear_details(void) {
     if (sorted_position < 0) {
         jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
     } else {
-        gtk_check_menu_item_set_active
-                (GTK_CHECK_MENU_ITEM(todo_cat_menu_item2[sorted_position]), TRUE);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu2),
-                                    (guint)find_menu_cat_pos(sorted_position));
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu2), find_menu_cat_pos(sorted_position));
     }
 
     set_new_button_to(CLEAR_FLAG);
@@ -1386,13 +1415,8 @@ static int todo_get_details(struct ToDo *new_todo, unsigned char *attrib) {
         new_todo->note = NULL;
     }
 
-    for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
-        if (GTK_IS_WIDGET(todo_cat_menu_item2[i])) {
-            if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(todo_cat_menu_item2[i]))) {
-                *attrib = (unsigned char) sort_l[i].cat_num;
-                break;
-            }
-        }
+    if (GTK_IS_WIDGET(category_menu2)) {
+        *attrib = get_selected_category_from_combo_box(GTK_COMBO_BOX(category_menu2));
     }
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(private_checkbox))) {
         *attrib |= dlpRecAttrSecret;
@@ -1414,17 +1438,18 @@ static int todo_get_details(struct ToDo *new_todo, unsigned char *attrib) {
 
     return EXIT_SUCCESS;
 }
-gboolean
-addNewRecord (GtkTreeModel *model,
-              GtkTreePath  *path,
-              GtkTreeIter  *iter,
-              gpointer data) {
 
-    int * i = gtk_tree_path_get_indices ( path ) ;
-    if(i[0] == row_selected){
-        MyToDo * mytodo = NULL;
-        gtk_tree_model_get(model,iter,TODO_DATA_COLUMN_ENUM,&mytodo,-1);
-        addNewRecordToDataStructure(mytodo,data);
+gboolean
+addNewRecord(GtkTreeModel *model,
+             GtkTreePath *path,
+             GtkTreeIter *iter,
+             gpointer data) {
+
+    int *i = gtk_tree_path_get_indices(path);
+    if (i[0] == row_selected) {
+        MyToDo *mytodo = NULL;
+        gtk_tree_model_get(model, iter, TODO_DATA_COLUMN_ENUM, &mytodo, -1);
+        addNewRecordToDataStructure(mytodo, data);
         return TRUE;
     }
     return FALSE;
@@ -1432,7 +1457,7 @@ addNewRecord (GtkTreeModel *model,
 
 }
 
-void addNewRecordToDataStructure(MyToDo * mtodo, gpointer data){
+void addNewRecordToDataStructure(MyToDo *mtodo, gpointer data) {
 
     struct ToDo new_todo;
     unsigned char attrib = 0;
@@ -1509,11 +1534,11 @@ void addNewRecordToDataStructure(MyToDo * mtodo, gpointer data){
 }
 
 static void cb_add_new_record(GtkWidget *widget, gpointer data) {
-    if(gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore), NULL) != 0) {
+    if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore), NULL) != 0) {
         gtk_tree_model_foreach(GTK_TREE_MODEL(listStore), addNewRecord, data);
-    }else {
+    } else {
         //no records exist in category yet.
-        addNewRecordToDataStructure(NULL,data);
+        addNewRecordToDataStructure(NULL, data);
     }
 }
 
@@ -1535,6 +1560,7 @@ static void clear_mytodos(MyToDo *mtodo) {
 
     return;
 }
+
 /* End Masking */
 
 
@@ -1548,7 +1574,7 @@ static gint sortNoteColumn(GtkTreeModel *model,
         case TODO_NOTE_COLUMN_ENUM: {
             ret = compareNoteColumn(model, left, right);
         }
-        break;
+            break;
         default:
             break;
     }
@@ -1556,17 +1582,17 @@ static gint sortNoteColumn(GtkTreeModel *model,
 
 }
 
-gint compareCheckColumn( GtkTreeModel *model,  GtkTreeIter *left,  GtkTreeIter *right) {
+gint compareCheckColumn(GtkTreeModel *model, GtkTreeIter *left, GtkTreeIter *right) {
     gint ret;
     gboolean *name1, *name2;
 
     gtk_tree_model_get(GTK_TREE_MODEL(model), left, TODO_CHECK_COLUMN_ENUM, &name1, -1);
     gtk_tree_model_get(GTK_TREE_MODEL(model), right, TODO_CHECK_COLUMN_ENUM, &name2, -1);
-    if(!name1 && name2){
+    if (!name1 && name2) {
         ret = 1;
-    }else if(name1 && !name2){
+    } else if (name1 && !name2) {
         ret = -1;
-    }else {
+    } else {
         ret = 0;
     }
     return ret;
@@ -1597,23 +1623,21 @@ static void column_clicked_cb(GtkTreeViewColumn *column) {
 
 }
 
-static void checkedCallBack(GtkCellRendererToggle * renderer, gchar* path, GtkListStore * model)
-{
+static void checkedCallBack(GtkCellRendererToggle *renderer, gchar *path, GtkListStore *model) {
     GtkTreeIter iter;
     gboolean active;
     MyToDo *mtodo;
-    active = gtk_cell_renderer_toggle_get_active (renderer);
+    active = gtk_cell_renderer_toggle_get_active(renderer);
 
-    gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (model), &iter, path);
+    gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL (model), &iter, path);
     gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, TODO_DATA_COLUMN_ENUM, &mtodo, -1);
     if (active) {
-       // gtk_cell_renderer_set_alignment(GTK_CELL_RENDERER(renderer), 0, 0);
-        gtk_list_store_set (GTK_LIST_STORE (model), &iter, TODO_CHECK_COLUMN_ENUM, FALSE, -1);
+        // gtk_cell_renderer_set_alignment(GTK_CELL_RENDERER(renderer), 0, 0);
+        gtk_list_store_set(GTK_LIST_STORE (model), &iter, TODO_CHECK_COLUMN_ENUM, FALSE, -1);
         mtodo->todo.complete = 0;
-    }
-    else {
-       // gtk_cell_renderer_set_alignment(GTK_CELL_RENDERER(renderer), 0.5, 0.5);
-        gtk_list_store_set (GTK_LIST_STORE (model), &iter, TODO_CHECK_COLUMN_ENUM, TRUE, -1);
+    } else {
+        // gtk_cell_renderer_set_alignment(GTK_CELL_RENDERER(renderer), 0.5, 0.5);
+        gtk_list_store_set(GTK_LIST_STORE (model), &iter, TODO_CHECK_COLUMN_ENUM, TRUE, -1);
         mtodo->todo.complete = 1;
     }
 }
@@ -1636,7 +1660,7 @@ static gboolean handleRowSelection(GtkTreeSelection *selection,
 
     if ((gtk_tree_model_get_iter(model, &iter, path)) && (!path_currently_selected)) {
 
-      int * i = gtk_tree_path_get_indices ( path ) ;
+        int *i = gtk_tree_path_get_indices(path);
         row_selected = i[0];
         gtk_tree_model_get(model, &iter, TODO_DATA_COLUMN_ENUM, &mtodo, -1);
         if ((record_changed == MODIFY_FLAG) || (record_changed == NEW_FLAG)) {
@@ -1645,7 +1669,7 @@ static gboolean handleRowSelection(GtkTreeSelection *selection,
             }
             b = dialog_save_changed_record_with_cancel(pane, record_changed);
             if (b == DIALOG_SAID_1) { /* Cancel */
-               return TRUE;
+                return TRUE;
             }
             if (b == DIALOG_SAID_3) { /* Save */
                 cb_add_new_record(NULL, GINT_TO_POINTER(record_changed));
@@ -1681,7 +1705,8 @@ static gboolean handleRowSelection(GtkTreeSelection *selection,
         gtk_text_buffer_set_text(GTK_TEXT_BUFFER(todo_note_buffer), "", -1);
         index = mtodo->attrib & 0x0F;
         sorted_position = find_sort_cat_pos(index);
-        if (todo_cat_menu_item2[sorted_position] == NULL) {
+        int pos = findSortedPostion(sorted_position, GTK_COMBO_BOX(category_menu2));
+        if (pos != sorted_position && index != 0) {
             /* Illegal category */
             jp_logf(JP_LOG_DEBUG, "Category is not legal\n");
             index = sorted_position = 0;
@@ -1689,12 +1714,8 @@ static gboolean handleRowSelection(GtkTreeSelection *selection,
         }
         if (sorted_position < 0) {
             jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
-        } else {
-            gtk_check_menu_item_set_active
-                    (GTK_CHECK_MENU_ITEM(todo_cat_menu_item2[sorted_position]), TRUE);
         }
-        gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu2),
-                                    (guint) find_menu_cat_pos(sorted_position));
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu2), find_menu_cat_pos(sorted_position));
 
         if (todo->description) {
             if (todo->description[0]) {
@@ -1901,7 +1922,7 @@ static gboolean cb_key_pressed_shift_tab(GtkWidget *widget,
 
 /* This redraws the treeView and goes back to the same line number */
 static int todo_redraw(void) {
-    todo_update_liststore(listStore,category_menu1,&glob_todo_list, todo_category, TRUE);
+    todo_update_liststore(listStore, category_menu1, &glob_todo_list, todo_category, TRUE);
     return EXIT_SUCCESS;
 }
 
@@ -1951,13 +1972,11 @@ int todo_refresh(void) {
         index2 = find_menu_cat_pos(index) + 1;
         index += 1;
     }
-     todo_update_liststore(listStore, category_menu1, &glob_todo_list, todo_category, TRUE);
+    todo_update_liststore(listStore, category_menu1, &glob_todo_list, todo_category, TRUE);
     if (index < 0) {
         jp_logf(JP_LOG_WARN, _("Category is not legal\n"));
     } else {
-        gtk_check_menu_item_set_active
-                (GTK_CHECK_MENU_ITEM(todo_cat_menu_item1[index]), TRUE);
-        gtk_option_menu_set_history(GTK_OPTION_MENU(category_menu1), (guint) index2);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(category_menu1), index2);
     }
 
     return EXIT_SUCCESS;
@@ -2130,7 +2149,7 @@ void todo_update_liststore(GtkListStore *pListStore, GtkWidget *tooltip_widget,
 
         if (!(temp_todo->mtodo.todo.indefinite)) {
             due = &(temp_todo->mtodo.todo.due);
-            comp_due=due->tm_year*380+due->tm_mon*31+due->tm_mday-1;
+            comp_due = due->tm_year * 380 + due->tm_mon * 31 + due->tm_mday - 1;
 
             if (comp_due < comp_now) {
                 fgColor = get_color(LIST_OVERDUE_RED, LIST_OVERDUE_GREEN, LIST_OVERDUE_BLUE);
@@ -2138,7 +2157,7 @@ void todo_update_liststore(GtkListStore *pListStore, GtkWidget *tooltip_widget,
             } else if (comp_due == comp_now) {
                 fgColor = get_color(LIST_DUENOW_RED, LIST_DUENOW_GREEN, LIST_DUENOW_BLUE);
             }
-            showFgColor=TRUE;
+            showFgColor = TRUE;
         }
         gtk_list_store_set(pListStore, &iter,
                            TODO_CHECK_COLUMN_ENUM, checkColumnDisplay,
@@ -2149,26 +2168,23 @@ void todo_update_liststore(GtkListStore *pListStore, GtkWidget *tooltip_widget,
                            TODO_DATA_COLUMN_ENUM, &(temp_todo->mtodo),
                            TODO_BACKGROUND_COLOR_ENUM, showBgColor ? &bgColor : NULL,
                            TODO_BACKGROUND_COLOR_ENABLED_ENUM, showBgColor,
-                           TODO_FOREGROUND_COLOR_ENUM,showFgColor ? gdk_color_to_string(&fgColor) : NULL,
-                           TODO_FORGROUND_COLOR_ENABLED_ENUM,showFgColor,
+                           TODO_FOREGROUND_COLOR_ENUM, showFgColor ? gdk_color_to_string(&fgColor) : NULL,
+                           TODO_FORGROUND_COLOR_ENABLED_ENUM, showFgColor,
                            -1);
 
         entries_shown++;
     }
-    if ((main) && (entries_shown>0)) {
+    if ((main) && (entries_shown > 0)) {
         /* First, select any record being searched for */
-        if (glob_find_id)
-        {
+        if (glob_find_id) {
             todo_find();
         }
             /* Second, try the currently selected row */
-        else if (row_selected < entries_shown)
-        {
+        else if (row_selected < entries_shown) {
             gtk_tree_model_foreach(GTK_TREE_MODEL(pListStore), selectRecordByRow, NULL);
         }
             /* Third, select row 0 if nothing else is possible */
-        else
-        {
+        else {
             row_selected = 0;
             gtk_tree_model_foreach(GTK_TREE_MODEL(pListStore), selectRecordByRow, NULL);
         }
@@ -2185,18 +2201,19 @@ void todo_update_liststore(GtkListStore *pListStore, GtkWidget *tooltip_widget,
     }
 
 }
+
 gboolean
-findRecord (GtkTreeModel *model,
-              GtkTreePath  *path,
-              GtkTreeIter  *iter,
-              gpointer data) {
+findRecord(GtkTreeModel *model,
+           GtkTreePath *path,
+           GtkTreeIter *iter,
+           gpointer data) {
 
     if (glob_find_id) {
-        MyToDo * mytodo = NULL;
+        MyToDo *mytodo = NULL;
 
-        gtk_tree_model_get(model,iter,TODO_DATA_COLUMN_ENUM,&mytodo,-1);
-        if(mytodo->unique_id == glob_find_id){
-            GtkTreeSelection * selection = NULL;
+        gtk_tree_model_get(model, iter, TODO_DATA_COLUMN_ENUM, &mytodo, -1);
+        if (mytodo->unique_id == glob_find_id) {
+            GtkTreeSelection *selection = NULL;
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
             gtk_tree_selection_select_path(selection, path);
             gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(treeView), path, TODO_TEXT_COLUMN_ENUM, FALSE, 1.0, 0.0);
@@ -2209,13 +2226,13 @@ findRecord (GtkTreeModel *model,
 
 
 gboolean
-selectRecordByRow (GtkTreeModel *model,
-                   GtkTreePath  *path,
-                   GtkTreeIter  *iter,
-                   gpointer data) {
-    int * i = gtk_tree_path_get_indices ( path ) ;
-    if(i[0] == row_selected){
-        GtkTreeSelection * selection = NULL;
+selectRecordByRow(GtkTreeModel *model,
+                  GtkTreePath *path,
+                  GtkTreeIter *iter,
+                  gpointer data) {
+    int *i = gtk_tree_path_get_indices(path);
+    if (i[0] == row_selected) {
+        GtkTreeSelection *selection = NULL;
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
         gtk_tree_selection_select_path(selection, path);
         gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(treeView), path, TODO_TEXT_COLUMN_ENUM, FALSE, 1.0, 0.0);
@@ -2224,8 +2241,8 @@ selectRecordByRow (GtkTreeModel *model,
 
     return FALSE;
 }
-static int todo_find(void)
-{
+
+static int todo_find(void) {
     gtk_tree_model_foreach(GTK_TREE_MODEL(listStore), findRecord, NULL);
     return EXIT_SUCCESS;
 
@@ -2245,7 +2262,9 @@ int todo_gui_cleanup(void) {
     set_pref(PREF_LAST_TODO_CATEGORY, todo_category, NULL, TRUE);
     set_pref(PREF_TODO_SORT_COLUMN, column_selected, NULL, TRUE);
 
-    set_pref(PREF_TODO_SORT_ORDER, gtk_tree_view_column_get_sort_order(gtk_tree_view_get_column(GTK_TREE_VIEW(treeView), column_selected)), NULL, TRUE);
+    set_pref(PREF_TODO_SORT_ORDER,
+             gtk_tree_view_column_get_sort_order(gtk_tree_view_get_column(GTK_TREE_VIEW(treeView), column_selected)),
+             NULL, TRUE);
     todo_liststore_clear(listStore);
     return EXIT_SUCCESS;
 }
@@ -2271,7 +2290,7 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     get_pref(PREF_TODO_VERSION, &todo_version, NULL);
     init();
     get_todo_app_info(&todo_app_info);
-     /* Initialize categories */
+    /* Initialize categories */
     get_pref(PREF_CHAR_SET, &char_set, NULL);
     for (i = 1; i < NUM_TODO_CAT_ITEMS; i++) {
         cat_name = charset_p2newj(todo_app_info.category.name[i], 31, (int) char_set);
@@ -2343,7 +2362,7 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     gtk_box_pack_start(GTK_BOX(vbox1), hbox_temp, FALSE, FALSE, 0);
 
     /* Left-side Category menu */
-    make_category_menu(&category_menu1, todo_cat_menu_item1,
+    make_category_menu(&category_menu1,
                        sort_l, cb_category, TRUE, TRUE);
     gtk_box_pack_start(GTK_BOX(hbox_temp), category_menu1, TRUE, TRUE, 0);
 
@@ -2356,7 +2375,8 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     gtk_box_pack_start(GTK_BOX(vbox1), scrolled_window, TRUE, TRUE, 0);
     //
     listStore = gtk_list_store_new(TODO_NUM_COLS, G_TYPE_BOOLEAN, G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING,
-                                   G_TYPE_STRING, G_TYPE_POINTER,GDK_TYPE_COLOR,G_TYPE_BOOLEAN,G_TYPE_STRING,G_TYPE_BOOLEAN);
+                                   G_TYPE_STRING, G_TYPE_POINTER, GDK_TYPE_COLOR, G_TYPE_BOOLEAN, G_TYPE_STRING,
+                                   G_TYPE_BOOLEAN);
     GtkTreeSortable *sortable;
     sortable = GTK_TREE_SORTABLE(listStore);
     gtk_tree_sortable_set_sort_func(sortable, TODO_NOTE_COLUMN_ENUM, sortNoteColumn,
@@ -2368,8 +2388,11 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
 
     GtkTreeViewColumn *taskColumn = gtk_tree_view_column_new_with_attributes("Task",
                                                                              taskRenderer,
-                                                                             "text", TODO_TEXT_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "text", TODO_TEXT_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(taskColumn, TODO_TEXT_COLUMN_ENUM);
 
@@ -2378,34 +2401,48 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
 
     GtkTreeViewColumn *dateColumn = gtk_tree_view_column_new_with_attributes("Due",
                                                                              dateRenderer,
-                                                                             "text", TODO_DATE_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
-                                                                             "foreground",TODO_FOREGROUND_COLOR_ENUM,
-                                                                             "foreground-set",TODO_FORGROUND_COLOR_ENABLED_ENUM,
+                                                                             "text", TODO_DATE_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "foreground", TODO_FOREGROUND_COLOR_ENUM,
+                                                                             "foreground-set",
+                                                                             TODO_FORGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(dateColumn, TODO_DATE_COLUMN_ENUM);
 
-    GtkCellRenderer *priorityRenderer  = gtk_cell_renderer_text_new();
+    GtkCellRenderer *priorityRenderer = gtk_cell_renderer_text_new();
     GtkTreeViewColumn *priorityColumn = gtk_tree_view_column_new_with_attributes("",
                                                                                  priorityRenderer,
-                                                                                 "text", TODO_PRIORITY_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                                 "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                                 "text", TODO_PRIORITY_COLUMN_ENUM,
+                                                                                 "cell-background-gdk",
+                                                                                 TODO_BACKGROUND_COLOR_ENUM,
+                                                                                 "cell-background-set",
+                                                                                 TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                                  NULL);
     gtk_tree_view_column_set_sort_column_id(priorityColumn, TODO_PRIORITY_COLUMN_ENUM);
 
-    GtkCellRenderer *noteRenderer  = gtk_cell_renderer_pixbuf_new();
+    GtkCellRenderer *noteRenderer = gtk_cell_renderer_pixbuf_new();
     GtkTreeViewColumn *noteColumn = gtk_tree_view_column_new_with_attributes("",
                                                                              noteRenderer,
-                                                                             "pixbuf", TODO_NOTE_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                             "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,
+                                                                             "pixbuf", TODO_NOTE_COLUMN_ENUM,
+                                                                             "cell-background-gdk",
+                                                                             TODO_BACKGROUND_COLOR_ENUM,
+                                                                             "cell-background-set",
+                                                                             TODO_BACKGROUND_COLOR_ENABLED_ENUM,
                                                                              NULL);
     gtk_tree_view_column_set_sort_column_id(noteColumn, TODO_NOTE_COLUMN_ENUM);
 
 
     GtkCellRenderer *checkRenderer = gtk_cell_renderer_toggle_new();
 
-    GtkTreeViewColumn *checkColumn = gtk_tree_view_column_new_with_attributes("",checkRenderer,"active",TODO_CHECK_COLUMN_ENUM,"cell-background-gdk",TODO_BACKGROUND_COLOR_ENUM,
-                                                                              "cell-background-set",TODO_BACKGROUND_COLOR_ENABLED_ENUM,NULL);
+    GtkTreeViewColumn *checkColumn = gtk_tree_view_column_new_with_attributes("", checkRenderer, "active",
+                                                                              TODO_CHECK_COLUMN_ENUM,
+                                                                              "cell-background-gdk",
+                                                                              TODO_BACKGROUND_COLOR_ENUM,
+                                                                              "cell-background-set",
+                                                                              TODO_BACKGROUND_COLOR_ENABLED_ENUM, NULL);
     g_signal_connect (checkRenderer, "toggled",
                       G_CALLBACK(checkedCallBack),
                       listStore);
@@ -2430,12 +2467,12 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
 
 
     /* Put pretty pictures in the treeView column headings */
-    get_pixbufs(PIXMAP_NOTE,&pixbuf);
+    get_pixbufs(PIXMAP_NOTE, &pixbuf);
     pixbufwid = gtk_image_new_from_pixbuf(pixbuf);
     gtk_widget_show(GTK_WIDGET(pixbufwid));
     gtk_tree_view_column_set_widget(noteColumn, pixbufwid);
     gtk_tree_view_column_set_alignment(noteColumn, GTK_JUSTIFY_CENTER);
-    get_pixbufs(PIXMAP_BOX_CHECKED,&pixbuf);
+    get_pixbufs(PIXMAP_BOX_CHECKED, &pixbuf);
     pixbufwid = gtk_image_new_from_pixbuf(pixbuf);
     gtk_widget_show(GTK_WIDGET(pixbufwid));
     gtk_tree_view_column_set_widget(checkColumn, pixbufwid);
@@ -2459,13 +2496,12 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
     for (int x = 0; x < TODO_NUM_COLS - 5; x++) {
         gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(GTK_TREE_VIEW(treeView), x), gtk_false());
     }
-    gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(GTK_TREE_VIEW(treeView), column_selected), gtk_true());
+    gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(GTK_TREE_VIEW(treeView), column_selected),
+                                            gtk_true());
     gtk_tree_view_columns_autosize(GTK_TREE_VIEW(treeView));
 
     get_pref(PREF_TODO_SORT_ORDER, &ivalue, NULL);
-    gtk_tree_sortable_set_sort_column_id(sortable, column_selected, (GtkSortType)  ivalue);
-
-
+    gtk_tree_sortable_set_sort_column_id(sortable, column_selected, (GtkSortType) ivalue);
 
 
     g_object_unref(model);
@@ -2537,10 +2573,11 @@ int todo_gui(GtkWidget *vbox, GtkWidget *hbox) {
 
     /* Right-side Category menu */
     /* Clear GTK option menus before use */
-    for (i = 0; i < NUM_TODO_CAT_ITEMS; i++) {
-        todo_cat_menu_item2[i] = NULL;
+    if (category_menu2 != NULL) {
+        GtkTreeModel *clearingmodel = gtk_combo_box_get_model(GTK_COMBO_BOX(category_menu2));
+        gtk_list_store_clear(GTK_LIST_STORE(clearingmodel));
     }
-    make_category_menu(&category_menu2, todo_cat_menu_item2,
+    make_category_menu(&category_menu2,
                        sort_l, NULL, FALSE, FALSE);
     gtk_box_pack_start(GTK_BOX(hbox_temp), category_menu2, TRUE, TRUE, 0);
 
