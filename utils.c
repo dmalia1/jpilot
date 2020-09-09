@@ -340,11 +340,11 @@ int cal_dialog(GtkWindow *main_window,
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(cb_quit),
                        GINT_TO_POINTER(CAL_DONE));
 
-    G_OBJECT_set_data(G_OBJECT(window), "mon", mon);
-    G_OBJECT_set_data(G_OBJECT(window), "day", day);
-    G_OBJECT_set_data(G_OBJECT(window), "year", year);
-    G_OBJECT_set_data(G_OBJECT(window), "return_code", &return_code);
-    G_OBJECT_set_data(G_OBJECT(window), "cal", cal);
+    gtk_object_set_data(G_OBJECT(window), "mon", mon);
+    gtk_object_set_data(G_OBJECT(window), "day", day);
+    gtk_object_set_data(G_OBJECT(window), "year", year);
+    gtk_object_set_data(G_OBJECT(window), "return_code", &return_code);
+    gtk_object_set_data(G_OBJECT(window), "cal", cal);
 
     gtk_widget_show_all(window);
 

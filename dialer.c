@@ -199,7 +199,7 @@ int dialog_dial(GtkWindow *main_window, char *string, char *ext) {
     /* Set up a data structure for the window */
     Pdata = malloc(sizeof(struct dialog_data));
 
-    G_OBJECT_set_data(G_OBJECT(dialog), "dialog_data", Pdata);
+    gtk_object_set_data(G_OBJECT(dialog), "dialog_data", Pdata);
 
     vbox1 = gtk_vbox_new(FALSE, 2);
 
