@@ -611,7 +611,7 @@ void cb_prefs_gui(GtkWidget *widget, gpointer data)
 
    backups_entry = new_gtk_entry_with_max_length(2);
    entry_set_multiline_truncate(GTK_ENTRY(backups_entry), TRUE);
-   gtk_widget_set_usize(backups_entry, 30, 0);
+   gtk_widget_set_size_request(backups_entry, 30, 0);
    gtk_table_attach_defaults(GTK_TABLE(table), GTK_WIDGET(backups_entry),
                              2, 3, 3, 4);
    get_pref(PREF_NUM_BACKUPS, &ivalue, NULL);
