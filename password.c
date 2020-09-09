@@ -231,7 +231,7 @@ static void cb_dialog_button(GtkWidget *widget,
 
    w = gtk_widget_get_toplevel(widget);
 
-   Pdata = gtk_object_get_data(G_OBJECT(w), "dialog_data");
+   Pdata = g_object_get_data(G_OBJECT(w), "dialog_data");
    if (Pdata) {
       Pdata->button_hit = GPOINTER_TO_INT(data);
    }
@@ -243,7 +243,7 @@ static gboolean cb_destroy_dialog(GtkWidget *widget)
    struct dialog_data *Pdata;
    const char *entry;
 
-   Pdata = gtk_object_get_data(G_OBJECT(widget), "dialog_data");
+   Pdata = g_object_get_data(G_OBJECT(widget), "dialog_data");
    if (!Pdata) {
       return TRUE;
    }
@@ -344,7 +344,7 @@ int dialog_password(GtkWindow *main_window, char *ascii_password, int retry)
    Pdata.button_hit = DIALOG_SAID_1;
    Pdata.entry=entry;
    Pdata.text[0]='\0';
-   gtk_object_set_data(G_OBJECT(dialog), "dialog_data", &Pdata);
+   g_object_set_data(G_OBJECT(dialog), "dialog_data", &Pdata);
 
    gtk_widget_grab_focus(GTK_WIDGET(entry));
 

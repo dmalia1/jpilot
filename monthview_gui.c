@@ -65,10 +65,10 @@ static gboolean cb_destroy(GtkWidget *widget)
 
    for (n=0; n<37; n++) {
       text = month_day[n];
-      gstr = gtk_object_get_data(G_OBJECT(text), "gstr");
+      gstr = g_object_get_data(G_OBJECT(text), "gstr");
       if (gstr) {
          g_string_free(gstr, TRUE);
-         G_OBJECT_remove_data(G_OBJECT(text), "gstr");
+         g_object_remove_dat(G_OBJECT(text), "gstr");
       }
    }
    return FALSE;
@@ -126,7 +126,7 @@ static void cb_enter_notify(GtkWidget *widget, GdkEvent *event, gpointer data)
    prev_day = GPOINTER_TO_INT(data)+1-glob_offset;
 
    textview = gtk_bin_get_child(GTK_BIN(widget));
-   gstr = gtk_object_get_data(G_OBJECT(textview), "gstr");
+   gstr = g_object_get_data(G_OBJECT(textview), "gstr");
    if (gstr) {
       gtk_text_buffer_set_text(GTK_TEXT_BUFFER(all_appts_buffer), gstr->str, -1);
    } else {
@@ -314,10 +314,10 @@ static int display_months_appts(struct tm *date_in, GtkWidget **day_texts)
    
    for (n=0; n<37; n++) {
       temp_text = month_day[n];
-      gstr = gtk_object_get_data(G_OBJECT(temp_text), "gstr");
+      gstr = g_object_get_data(G_OBJECT(temp_text), "gstr");
       if (gstr) {
          g_string_free(gstr, TRUE);
-         G_OBJECT_remove_data(G_OBJECT(temp_text), "gstr");
+         g_object_remove_dat(G_OBJECT(temp_text), "gstr");
       }
    }
 
@@ -393,7 +393,7 @@ static int display_months_appts(struct tm *date_in, GtkWidget **day_texts)
             gtk_text_buffer_insert_at_cursor(GTK_TEXT_BUFFER(text_buffers[n]), desc, -1);
          }
       }
-      gtk_object_set_data(G_OBJECT(texts[n]), "gstr", gstr);
+      g_object_set_data(G_OBJECT(texts[n]), "gstr", gstr);
    }
    free_CalendarEventList(&ce_list);
 

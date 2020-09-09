@@ -340,11 +340,11 @@ int cal_dialog(GtkWindow *main_window,
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(cb_quit),
                        GINT_TO_POINTER(CAL_DONE));
 
-    gtk_object_set_data(G_OBJECT(window), "mon", mon);
-    gtk_object_set_data(G_OBJECT(window), "day", day);
-    gtk_object_set_data(G_OBJECT(window), "year", year);
-    gtk_object_set_data(G_OBJECT(window), "return_code", &return_code);
-    gtk_object_set_data(G_OBJECT(window), "cal", cal);
+    g_object_set_data(G_OBJECT(window), "mon", mon);
+    g_object_set_data(G_OBJECT(window), "day", day);
+    g_object_set_data(G_OBJECT(window), "year", year);
+    g_object_set_data(G_OBJECT(window), "return_code", &return_code);
+    g_object_set_data(G_OBJECT(window), "cal", cal);
 
     gtk_widget_show_all(window);
 
@@ -398,16 +398,16 @@ static void cb_quit(GtkWidget *widget, gpointer data) {
 
     window = gtk_widget_get_toplevel(widget);
 
-    Preturn_code = gtk_object_get_data(G_OBJECT(window), "return_code");
+    Preturn_code = g_object_get_data(G_OBJECT(window), "return_code");
     if (Preturn_code) *Preturn_code = GPOINTER_TO_INT(data);
-    cal = gtk_object_get_data(G_OBJECT(window), "cal");
+    cal = g_object_get_data(G_OBJECT(window), "cal");
 
     if (Preturn_code && *Preturn_code == CAL_DONE) {
         if (cal) {
             gtk_calendar_get_date(GTK_CALENDAR(cal), &y, &m, &d);
-            Pm = gtk_object_get_data(G_OBJECT(window), "mon");
-            Pd = gtk_object_get_data(G_OBJECT(window), "day");
-            Py = gtk_object_get_data(G_OBJECT(window), "year");
+            Pm = g_object_get_data(G_OBJECT(window), "mon");
+            Pd = g_object_get_data(G_OBJECT(window), "day");
+            Py = g_object_get_data(G_OBJECT(window), "year");
             if (Pm) *Pm = m;
             if (Pd) *Pd = d;
             if (Py) *Py = y;

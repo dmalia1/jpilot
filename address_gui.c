@@ -1278,7 +1278,7 @@ static void cb_addr_export_ok(GtkWidget *export_window, GtkWidget *treeView,
                     /*
              for (i=0; i<schema_size; i++) {
                 if (!strcasecmp(contact_app_info.phoneLabels[cont->phoneLabel[phone_i]], _("E-mail"))) {
-                   gtk_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
+                   g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
                    gtk_button_set_label(GTK_BUTTON(dial_button[phone_i]), _("Mail"));
                 }
                 fprintf(out, "%s\",", csv_text);
@@ -2479,7 +2479,7 @@ static void cb_dial_or_mail(GtkWidget *widget, gpointer data) {
     if (!str) return;
     printf("[%s]\n", str);
 
-    is_mail = GPOINTER_TO_INT(gtk_object_get_data(G_OBJECT(widget), "mail"));
+    is_mail = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "mail"));
     if (is_mail) {
         email_contact(widget, str);
     } else {
@@ -2803,7 +2803,7 @@ static void cb_photo_browse_ok(GtkWidget *widget, gpointer data) {
     sel = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (widget));
     set_pref(PREF_CONTACTS_PHOTO_FILENAME, 0, sel, TRUE);
 
-    Pselection = gtk_object_get_data(G_OBJECT(GTK_FILE_CHOOSER(widget)), "selection");
+    Pselection = g_object_get_data(G_OBJECT(GTK_FILE_CHOOSER(widget)), "selection");
     if (Pselection) {
         jp_logf(JP_LOG_DEBUG, "setting selection to %s\n", sel);
         *Pselection = strdup(sel);
@@ -2844,7 +2844,7 @@ static int browse_photo(GtkWidget *main_window) {
     fileChooserWidget = gtk_file_chooser_dialog_new(_("Add Photo"), main_window, GTK_FILE_CHOOSER_ACTION_OPEN,
                                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN,
                                                     GTK_RESPONSE_ACCEPT, NULL);
-    gtk_object_set_data(G_OBJECT(GTK_FILE_CHOOSER(fileChooserWidget)), "selection", &selection);
+    g_object_set_data(G_OBJECT(GTK_FILE_CHOOSER(fileChooserWidget)), "selection", &selection);
     if (gtk_dialog_run(GTK_DIALOG (fileChooserWidget)) == GTK_RESPONSE_ACCEPT) {
         cb_photo_browse_ok(fileChooserWidget, NULL);
     } else {
@@ -3840,10 +3840,10 @@ static gboolean handleRowSelectionForAddress(GtkTreeSelection *selection,
                 case ADDRESS_GUI_DIAL_SHOW_PHONE_MENU_TEXT:
                     /* Set dial/email button text and callback data */
                     if (!strcasecmp(contact_app_info.phoneLabels[cont->phoneLabel[phone_i]], _("E-mail"))) {
-                        gtk_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
                         gtk_button_set_label(GTK_BUTTON(dial_button[phone_i]), _("Mail"));
                     } else {
-                        gtk_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
                         gtk_button_set_label(GTK_BUTTON(dial_button[phone_i]), _("Dial"));
                     }
                     if ((phone_i < NUM_PHONE_ENTRIES) && (cont->phoneLabel[phone_i] < NUM_PHONE_LABELS)) {
@@ -4424,10 +4424,10 @@ int address_gui(GtkWidget *vbox, GtkWidget *hbox) {
                 case ADDRESS_GUI_DIAL_SHOW_PHONE_MENU_TEXT:
                     if (!strcasecmp(contact_app_info.phoneLabels[phone_i], _("E-mail"))) {
                         dial_button[phone_i] = gtk_button_new_with_label(_("Mail"));
-                        gtk_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", GINT_TO_POINTER(1));
                     } else {
                         dial_button[phone_i] = gtk_button_new_with_label(_("Dial"));
-                        gtk_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
+                        g_object_set_data(G_OBJECT(dial_button[phone_i]), "mail", 0);
                     }
                     gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(dial_button[phone_i]),
                                      x - 4, x - 3, table_y_i, table_y_i + 1, GTK_FILL, 0, 0, 0);
