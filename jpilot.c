@@ -1638,7 +1638,7 @@ static gint cb_output_idle(gpointer data) {
 static gint cb_output2(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     /* Because the pane isn't redrawn yet we can't get positions from it.
      * So we have to call back after everything is drawn */
-    gtk_idle_add(cb_output_idle, data);
+    g_idle_add(cb_output_idle, data);
 
     return EXIT_SUCCESS;
 }
@@ -2329,7 +2329,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    gtk_idle_add(cb_check_version, window);
+    g_idle_add(cb_check_version, window);
 
     gtk_main();
 
