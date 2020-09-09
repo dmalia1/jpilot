@@ -2450,7 +2450,10 @@ int make_category_menu(GtkWidget **category_menu,
 
     return EXIT_SUCCESS;
 }
-
+void get_window_size(GdkWindow *window, int *width, int *height){
+    *width = gdk_window_get_width(window);
+    *height = gdk_window_get_height(window);
+}
 int findSortedPostion(int sorted_position,GtkComboBox * box) {
     GtkTreeModel * model = gtk_combo_box_get_model(GTK_COMBO_BOX(box));
     GtkTreeIter iter;

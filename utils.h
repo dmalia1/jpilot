@@ -473,7 +473,7 @@ int make_category_menu(GtkWidget **category_menu,
                        int add_edit_cat_item);
 int get_selected_category_from_combo_box(GtkComboBox * box);
 int findSortedPostion(int sorted_position,GtkComboBox * box);
-
+void get_window_size(GdkWindow *window, int *width, int *height);
 int jp_copy_file(char *src, char *dest);
 FILE *jp_open_home_file(const char *filename, const char *mode);
 int jp_close_home_file(FILE *pc_in);
