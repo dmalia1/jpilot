@@ -2913,7 +2913,7 @@ static gboolean cb_key_pressed_left_side(GtkWidget *widget,
     GtkTextIter iter;
 
     if (event->keyval == GDK_KEY_Return) {
-        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
 
         if (address_version == 0) {
             switch (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook))) {
@@ -2973,14 +2973,14 @@ static gboolean cb_key_pressed_right_side(GtkWidget *widget,
                                           GdkEventKey *event,
                                           gpointer data) {
     if ((event->keyval == GDK_KEY_Return) && (event->state & GDK_SHIFT_MASK)) {
-        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
         gtk_widget_grab_focus(GTK_WIDGET(treeView));
         return TRUE;
     }
     /* Call external editor for note text */
     if (data != NULL &&
         (event->keyval == GDK_KEY_e) && (event->state & GDK_CONTROL_MASK)) {
-        g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
+        g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
 
         /* Get current text and place in temporary file */
         GtkTextIter start_iter;
@@ -3581,7 +3581,7 @@ cb_key_pressed_quickfind(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     row_count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(listStore), NULL);
     if (!row_count) return FALSE;
 
-    g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
+    g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
 
     select_row = rowSelected + add;
     if (select_row > row_count - 1) {
@@ -3614,7 +3614,7 @@ static gboolean cb_key_pressed(GtkWidget *widget, GdkEventKey *event) {
             return FALSE;
         }
     }
-    g_signal_emit_by_name(G_OBJECT(widget), "key_press_event");
+    g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
 
     /* Initialize page and next widget in case search fails */
     page = schema[0].notebook_page;
